@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, Text, Image } from 'react-native';
 import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import Home from '../views/Home';
 import Activity from '../views/Activity';
 import Leaderboard from '../views/Leaderboard';
 import Subscription from '../views/Subscription';
+import Header from './Header';
 
 type RouteName = 'Home' | 'Activity' | 'Leaderboard' | 'Subscription';
 
@@ -77,16 +78,56 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
 };
 
 const Navigator: React.FC = () => {
+
+  const [state, setState] = useState<'Home' | 'Activity' | 'Leaderboard' | 'Subscription'>('Home');
+
+  const handleTabChange = (e: any) => {
+    if(e.target.includes('Home')){
+      setState('Home');
+      return;
+    }
+    if(e.target.includes('Activity')){
+      setState('Activity');
+      return;
+    }
+    if(e.target.includes('Leaderboard')){
+      setState('Leaderboard');
+      return;
+    }
+    if(e.target.includes('Subscription')){
+      setState('Subscription');
+      return;
+    }
+  };
   return (
+    <>
+    {state === 'Home' && <Header/>}
     <Tab.Navigator
       tabBar={(props) => <CustomTabBar {...props} />} // Replace default tab bar
       screenOptions={{ headerShown: false }}
     >
-      <Tab.Screen name="Home" component={Home} />
-      <Tab.Screen name="Activity" component={Activity} />
-      <Tab.Screen name="Leaderboard" component={Leaderboard} />
-      <Tab.Screen name="Subscription" component={Subscription} />
+      <Tab.Screen name="Home" component={Home} listeners={{
+            tabPress: (e) => {
+              handleTabChange(e);
+            },
+          }} />
+      <Tab.Screen name="Activity" component={Activity} listeners={{
+            tabPress: (e) => {
+              handleTabChange(e);
+            },
+          }} />
+      <Tab.Screen name="Leaderboard" component={Leaderboard} listeners={{
+            tabPress: (e) => {
+              handleTabChange(e);
+            },
+          }} />
+      <Tab.Screen name="Subscription" component={Subscription} listeners={{
+            tabPress: (e) => {
+              handleTabChange(e);
+            },
+          }} />
     </Tab.Navigator>
+    </>
   );
 };
 

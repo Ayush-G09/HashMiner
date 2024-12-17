@@ -1,78 +1,26 @@
 import React from 'react';
-import { ImageBackground, FlatList, StyleSheet, Text, View, Image, ListRenderItem, ScrollView } from 'react-native';
+import { ImageBackground, FlatList, StyleSheet, Text, View, Image, ListRenderItem } from 'react-native';
 
-// Define the interface for card data
 interface CardData {
   id: string;
   name: string;
   price: string;
   description: string;
   hashRate: string;
-  image: any; // You can replace 'any' with a more specific type if needed
+  image: any;
 }
 
-const Subscription: React.FC = () => {
-  // Sample data
+const Subscription = () => {
   const cardData: CardData[] = [
-    {
-      id: '1',
-      name: 'Basic Miner',
-      price: '$100',
-      description: 'A reliable entry-level miner for beginners, offering consistent performance.',
-      hashRate: '1 Coin/hr',
-      image: require('../assets/m1.png'),
-    },
-    {
-      id: '2',
-      name: 'Advanced Miner',
-      price: '$120',
-      description: 'A cost-effective miner with boosted performance for moderate crypto earnings.',
-      hashRate: '10 Coin/hr',
-      image: require('../assets/m2.png'),
-    },
-    {
-      id: '3',
-      name: 'Pro Miner',
-      price: '$150',
-      description: 'A high-performance miner for users looking to scale their operations.',
-      hashRate: '1200 H/s',
-      image: require('../assets/m3.png'),
-    },
-    {
-      id: '4',
-      name: 'Galaxy Miner',
-      price: '$200',
-      description: 'A cutting-edge device with futuristic tech, designed for premium mining yields.',
-      hashRate: '1500 H/s',
-      image: require('../assets/m4.png'),
-    },
-    {
-      id: '5',
-      name: 'Quantum Extractor',
-      price: '$200',
-      description: 'A revolutionary miner utilizing quantum tech for unmatched hashing power.',
-      hashRate: '1500 H/s',
-      image: require('../assets/m5.png'),
-    },
-    {
-      id: '6',
-      name: 'Cosmic Harvester',
-      price: '$200',
-      description: 'A sci-fi marvel that pushes the boundaries of mining efficiency.',
-      hashRate: '1500 H/s',
-      image: require('../assets/m6.png'),
-    },
-    {
-      id: '7',
-      name: 'Nebula Reactor',
-      price: '$200',
-      description: 'An elite miner equipped with intergalactic tech, a must-have for top miners.',
-      hashRate: '1500 H/s',
-      image: require('../assets/m7.png'),
-    }
+    { id: '1', name: 'Basic Miner', price: '$100', description: 'A reliable entry-level miner for beginners, offering consistent performance.', hashRate: '1 Coin/hr', image: require('../assets/m1.png') },
+    { id: '2', name: 'Advanced Miner', price: '$120', description: 'A cost-effective miner with boosted performance for moderate crypto earnings.', hashRate: '10 Coin/hr', image: require('../assets/m2.png') },
+    { id: '3', name: 'Pro Miner', price: '$150', description: 'A high-performance miner for users looking to scale their operations.', hashRate: '1200 H/s', image: require('../assets/m3.png') },
+    { id: '4', name: 'Galaxy Miner', price: '$200', description: 'A cutting-edge device with futuristic tech, designed for premium mining yields.', hashRate: '1500 H/s', image: require('../assets/m4.png') },
+    { id: '5', name: 'Quantum Extractor', price: '$200', description: 'A revolutionary miner utilizing quantum tech for unmatched hashing power.', hashRate: '1500 H/s', image: require('../assets/m5.png') },
+    { id: '6', name: 'Cosmic Harvester', price: '$200', description: 'A sci-fi marvel that pushes the boundaries of mining efficiency.', hashRate: '1500 H/s', image: require('../assets/m6.png') },
+    { id: '7', name: 'Nebula Reactor', price: '$200', description: 'An elite miner equipped with intergalactic tech, a must-have for top miners.', hashRate: '1500 H/s', image: require('../assets/m7.png') }
   ];
 
-  // Function to render each card
   const renderCard: ListRenderItem<CardData> = ({ item }) => (
     <View style={styles.card}>
       <Image source={item.image} style={styles.cardImage} />
@@ -85,25 +33,21 @@ const Subscription: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <ImageBackground
-        source={require('../assets/gra4.jpg')}
-        style={styles.backgroundImage}>
-        <ScrollView showsVerticalScrollIndicator={false} style={{ width: '100%'}}>
-          <View style={{ width: '100%', alignItems: 'center'}}>
+      <ImageBackground source={require('../assets/gra4.jpg')} style={styles.backgroundImage}>
+        <View style={{width: '95%'}}>
+        {/* FlatList with Header */}
+        <FlatList
+          data={cardData}
+          renderItem={renderCard}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          columnWrapperStyle={styles.row}
+          ListHeaderComponent={
             <Text style={styles.headerText}>Subscription</Text>
-
-            {/* FlatList for displaying cards in a grid */}
-            <FlatList
-              data={cardData}
-              renderItem={renderCard}
-              keyExtractor={(item) => item.id}
-              numColumns={2} // Display 2 cards per row
-              columnWrapperStyle={styles.row} // Add space between columns
-              ListFooterComponent={() => <View style={{ marginBottom: 60 }} />} // Ensure footer space
-            />
-          </View>
-
-        </ScrollView>
+          }
+          ListFooterComponent={<View style={{ marginBottom: 60 }} />}
+        />
+        </View>
       </ImageBackground>
     </View>
   );
@@ -113,18 +57,13 @@ export default Subscription;
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
-    height: '100%',
+    flex: 1,
     backgroundColor: '#121212',
-    display: 'flex',
-    alignItems: 'center',
   },
   backgroundImage: {
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    alignItems: 'center',
+    flex: 1,
     justifyContent: 'center',
+    alignItems: 'center'
   },
   headerText: {
     color: 'white',
@@ -134,17 +73,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   row: {
-    justifyContent: 'space-between', // Ensure space between cards
-    flexWrap: 'wrap', // Allow for wrapping
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
   },
   card: {
-    width: '47%', // Make card width responsive
+    width: '47%',
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
     borderRadius: 10,
     padding: 10,
     marginBottom: 20,
     alignItems: 'center',
-    boxShadow: 'inset 0px 0px 15px 5px rgba(225, 225, 225, 0.3)',
   },
   cardImage: {
     width: 150,

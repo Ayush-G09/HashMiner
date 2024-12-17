@@ -4,7 +4,7 @@ import { LineChart } from 'react-native-chart-kit';
 
 const MyLineChart = () => {
   return (
-    <View style={{backgroundColor: 'black', marginTop: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingVertical: 15, borderRadius: 10, boxShadow: '0px 0px 5px 0px rgba(225, 225, 225, 0.3)'}}>
+    <View style={{backgroundColor: 'black', marginTop: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingVertical: 15, borderRadius: 10, boxShadow: '0px 0px 5px 0px rgba(225, 225, 225, 0.3)'}}>
       <LineChart
         data={{
           labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fir', 'Sat', 'Sun'],

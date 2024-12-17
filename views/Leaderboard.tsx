@@ -22,7 +22,7 @@ const Leaderboard = () => {
     <View style={styles.container}>
       <ImageBackground source={require('../assets/gra4.jpg')} style={styles.backgroundImage}>
         <ScrollView showsVerticalScrollIndicator={false} style={{width: '100%'}}>
-          <View style={{width: '100%', alignItems: 'center', paddingTop: 100, marginBottom: 20}}>
+          <View style={{width: '100%', alignItems: 'center', paddingTop: 40, marginBottom: 20}}>
             <View style={{display: 'flex', width: '90%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20}}>
               <Text style={{color: 'white', fontSize: 20, fontWeight: 800}}>Leaderboard</Text>
               <Image source={require('../assets/award.png')} style={{width: 30, height: 30}} />

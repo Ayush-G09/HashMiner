@@ -1,5 +1,5 @@
-import {Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
+import {Animated, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
 import MinerCard, { MinerCardType } from '../components/MinerCard';
 
 const Home = () => {
@@ -82,12 +82,11 @@ const Home = () => {
       <ImageBackground
         source={require('../assets/gra4.jpg')}
         style={styles.backgroundImage}>
-
           <ScrollView showsVerticalScrollIndicator={false} style={{width: '100%'}}>
 
             <View style={{width: '100%', alignItems: 'center'}}>
 
-          <View style={{width: '90%', paddingVertical: 20, backgroundColor: 'rgba(0, 0, 0, 0.3)', borderRadius: 10, marginTop: 100, alignItems: 'center', gap: 10, boxShadow: '0px 0px 5px 0px rgba(225, 225, 225, 0.3)'}}>
+          <View style={{width: '90%', paddingVertical: 20, backgroundColor: 'rgba(0, 0, 0, 0.3)', borderRadius: 10, marginTop: 20, alignItems: 'center', gap: 10, boxShadow: '0px 0px 5px 0px rgba(225, 225, 225, 0.3)'}}>
               <View style={{display: 'flex', width: '85%', alignItems: 'center', justifyContent: 'space-between', flexDirection: 'row'}}>
                 <Text style={{color: 'rgb(148, 146, 146)', fontWeight: 700, fontSize: 20}}>Balance</Text>
                 <Text style={{color: 'white', fontWeight: 500, fontSize: 15}}>💰 0.00</Text>
