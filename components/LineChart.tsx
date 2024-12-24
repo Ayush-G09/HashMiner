@@ -1,19 +1,17 @@
 import React from 'react';
-import { View, Text, Dimensions } from 'react-native';
+import { View, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store/store';
 
 const MyLineChart = () => {
+
+  const { coinPrice } = useSelector((state: RootState) => state.miner);
+
   return (
     <View style={{backgroundColor: 'black', marginTop: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingVertical: 15, borderRadius: 10, boxShadow: '0px 0px 5px 0px rgba(225, 225, 225, 0.3)'}}>
       <LineChart
-        data={{
-          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fir', 'Sat', 'Sun'],
-          datasets: [
-            {
-              data: [20, 45, 28, 80, 99, 43, 50],
-            },
-          ],
-        }}
+        data={coinPrice}
         width={Dimensions.get('window').width - 32} // Width of chart
         height={220} // Height of chart
         yAxisLabel={'$'}

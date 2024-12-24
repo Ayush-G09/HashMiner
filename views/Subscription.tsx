@@ -1,7 +1,7 @@
 import React from 'react';
 import { ImageBackground, FlatList, StyleSheet, Text, View, Image, ListRenderItem } from 'react-native';
 
-interface CardData {
+type CardData = {
   id: string;
   name: string;
   price: string;
@@ -46,6 +46,7 @@ const Subscription = () => {
             <Text style={styles.headerText}>Subscription</Text>
           }
           ListFooterComponent={<View style={{ marginBottom: 60 }} />}
+          showsVerticalScrollIndicator={false}
         />
         </View>
       </ImageBackground>

@@ -8,96 +8,37 @@ import {
 } from 'react-native';
 import React from 'react';
 import MyLineChart from '../components/LineChart';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store/store';
+import { MinerCardType } from '../components/MinerCard';
+import { getImageByCode, getNameByCode } from '../utils';
 
-type Miner = {
-  id: number;
-  title: string;
-  image: number;
-  miningRate: string;
-  coinsMined: number;
-  status: 'Running' | 'Stopped';
+type Props = {
+  miner: MinerCardType;
+  index: number;
 };
 
-const miners = [
-  {
-    id: 1,
-    title: 'Miner #01',
-    image: require('../assets/m1.png'),
-    miningRate: '1 coin/hr',
-    coinsMined: 50,
-    status: 'Running',
-  },
-  {
-    id: 2,
-    title: 'Miner #02',
-    image: require('../assets/m2.png'),
-    miningRate: '1 coin/hr',
-    coinsMined: 50,
-    status: 'Running',
-  },
-  {
-    id: 3,
-    title: 'Miner #03',
-    image: require('../assets/m3.png'),
-    miningRate: '1 coin/hr',
-    coinsMined: 50,
-    status: 'Running',
-  },
-  {
-    id: 4,
-    title: 'Miner #04',
-    image: require('../assets/m4.png'),
-    miningRate: '1 coin/hr',
-    coinsMined: 50,
-    status: 'Running',
-  },
-  {
-    id: 5,
-    title: 'Miner #05',
-    image: require('../assets/m5.png'),
-    miningRate: '1 coin/hr',
-    coinsMined: 50,
-    status: 'Running',
-  },
-  {
-    id: 6,
-    title: 'Miner #06',
-    image: require('../assets/m6.png'),
-    miningRate: '1 coin/hr',
-    coinsMined: 50,
-    status: 'Running',
-  },
-  {
-    id: 7,
-    title: 'Miner #07',
-    image: require('../assets/m7.png'),
-    miningRate: '1 coin/hr',
-    coinsMined: 50,
-    status: 'Running',
-  },
-] as Miner[];
-
-const MinerCard = ({title, image, miningRate, coinsMined, status}: Miner) => {
+const MinerCard = ({miner, index}: Props) => {
   return (
     <View style={{...styles.card, boxShadow: '0px 0px 5px 0px rgba(225, 225, 225, 0.3)'}}>
-      <Text style={styles.minerTitle}>{title}</Text>
+      <Text style={styles.minerTitle}>{`Miner #0${index+1}`}</Text>
       <View style={styles.cardContent}>
         <View style={styles.imageContainer}>
-          <Image source={image} style={styles.minerImage} />
+          <Image source={getImageByCode(miner.type)} style={styles.minerImage} />
         </View>
         <View style={styles.detailsContainer}>
-          <Text style={styles.minerType}>Basic Miner</Text>
+          <Text style={styles.minerType}>{getNameByCode(miner.type)}</Text>
           <View style={styles.row}>
             <Text style={styles.label}>Mining Rate</Text>
-            <Text style={styles.value}>{miningRate}</Text>
+            <Text style={styles.value}>{miner.hashRate} coin/hr</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>Coins Mined</Text>
-            <Text style={styles.value}>{coinsMined}</Text>
+            <Text style={styles.value}>{miner.coinsMined}</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>Status</Text>
-            <Text style={styles.status}>{status}</Text>
+            <Text style={{...styles.status, color: miner.status === 'Running' ? 'green' : 'red'}}>{miner.status}</Text>
           </View>
         </View>
       </View>
@@ -106,18 +47,23 @@ const MinerCard = ({title, image, miningRate, coinsMined, status}: Miner) => {
 };
 
 const Activity = () => {
+
+  const { miners } = useSelector((state: RootState) => state.miner);
+
   return (
     <View style={styles.container}>
       <ImageBackground
         source={require('../assets/gra4.jpg')}
         style={styles.backgroundImage}>
+        <Text style={{color: 'white', fontSize: 20, fontWeight: 800, width: '90%', marginTop: 20}}>Activity</Text>
         <ScrollView showsVerticalScrollIndicator={false} style={styles.scroll}>
           <View style={styles.contentWrapper}>
             <MyLineChart />
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>My Miners</Text>
-              {miners.map(miner => (
-                <MinerCard key={miner.id} {...miner} />
+              {!miners.length ? <View style={{width: '100%', backgroundColor: 'red', height: '30%', borderRadius: 10, marginTop: 100, alignItems: 'center', justifyContent: 'center'}}><Text style={{textAlign: 'center', color: 'white', fontSize: 15, fontWeight: 500}}>You don't have a Miner.</Text></View> :
+              miners.map((miner, index) => (
+                <MinerCard key={miner._id} miner={miner} index={index} />
               ))}
             </View>
           </View>
@@ -205,7 +151,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   status: {
-    color: 'green',
     fontWeight: '400',
     fontSize: 13,
   },

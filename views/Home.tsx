@@ -1,102 +1,101 @@
-import {Animated, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
-import MinerCard, { MinerCardType } from '../components/MinerCard';
+import {ActivityIndicator, BackHandler, ImageBackground, RefreshControl, ScrollView, StyleSheet, Text, ToastAndroid, View} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import MinerCard from '../components/MinerCard';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useDispatch, useSelector } from 'react-redux';
+import { resetCoinsMinedById, setBalance, setCoinPrice, setMiners } from '../store/minerSlice';
+import { RootState } from '../store/store';
+
+type State = {
+  loading: boolean;
+  backPressedOnce: boolean;
+}
 
 const Home = () => {
 
-  const miners = [
-    {
-      id: 'sdcs',
-      minerName: 'Miner #01',
-      status: 'Stopped',
-      imageSource: require('../assets/m1.png'),
-      hashRate: '1 coin/hr',
-      coinsMined: '50',
-      capacity: '100',
-      onCollectCoins: () => console.log(''),
-    },
-    {
-      id: 'sdcs2',
-      minerName: 'Miner #02',
-      status: 'Running',
-      imageSource: require('../assets/m2.png'),
-      hashRate: '1 coin/hr',
-      coinsMined: '50',
-      capacity: '100',
-      onCollectCoins: () => console.log(''),
-    },
-    {
-      id: 'sdcs3',
-      minerName: 'Miner #03',
-      status: 'Stopped',
-      imageSource: require('../assets/m3.png'),
-      hashRate: '1 coin/hr',
-      coinsMined: '50',
-      capacity: '100',
-      onCollectCoins: () => console.log(''),
-    },
-    {
-      id: 'sdcs4',
-      minerName: 'Miner #04',
-      status: 'Running',
-      imageSource: require('../assets/m4.png'),
-      hashRate: '1 coin/hr',
-      coinsMined: '50',
-      capacity: '100',
-      onCollectCoins: () => console.log(''),
-    },
-    {
-      id: 'sdcs5',
-      minerName: 'Miner #05',
-      status: 'Stopped',
-      imageSource: require('../assets/m5.png'),
-      hashRate: '1 coin/hr',
-      coinsMined: '50',
-      capacity: '100',
-      onCollectCoins: () => console.log(''),
-    },
-    {
-      id: 'sdcs6',
-      minerName: 'Miner #06',
-      status: 'Running',
-      imageSource: require('../assets/m6.png'),
-      hashRate: '1 coin/hr',
-      coinsMined: '50',
-      capacity: '100',
-      onCollectCoins: () => console.log(''),
-    },
-    {
-      id: 'sdcs7',
-      minerName: 'Miner #07',
-      status: 'Stopped',
-      imageSource: require('../assets/m7.png'),
-      hashRate: '1 coin/hr',
-      coinsMined: '50',
-      capacity: '100',
-      onCollectCoins: () => console.log(''),
-    },
-  ] as MinerCardType[]
-  
+  const dispatch = useDispatch();
+  const { balance, miners, coinPrice } = useSelector((state: RootState) => state.miner);
+
+  const [state, setState] = useState<State>({
+    loading: false,
+    backPressedOnce: false,
+  });
+
+  useEffect(() => {
+    const backAction = () => {
+      if (state.backPressedOnce) {
+        BackHandler.exitApp(); // Exit app on the second press
+      } else {
+        setState((prev) => ({...prev, backPressedOnce: true}));
+        ToastAndroid.show("Press again to exit", ToastAndroid.SHORT);
+
+        // Reset the back press flag after 2 seconds
+        setTimeout(() => setState((prev) => ({...prev, backPressedOnce: false})), 2000);
+      }
+      return true;
+    };
+
+    BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => BackHandler.removeEventListener('hardwareBackPress', backAction);
+  }, [state.backPressedOnce]);
+
+
+  const fetchData = async () => {
+    try {
+      const userId = await AsyncStorage.getItem("id");
+      setState((prev) => ({...prev, loading: true}));
+      const response = await axios.get(`https://hash-miner-backend.vercel.app/api/auth/user/${userId}`);
+      dispatch(setMiners(response.data.user.miners));
+      dispatch(setBalance(response.data.user.balance));
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setState((prev) => ({...prev, loading: false}));
+    }
+  };
+
+  const fetchCoinPrice = async () => {
+    try {
+      const response = await axios.get(`https://hash-miner-backend.vercel.app/api/auth/get-coin-price`);
+      dispatch(setCoinPrice(response.data));
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Call API when screen is loaded
+    fetchData(); // Call the API function
+    fetchCoinPrice();
+  }, []);
+
+  const refreshData = () => {
+    fetchData();
+    fetchCoinPrice();
+  }
+
   return (
     <View style={styles.container}>
       <ImageBackground
         source={require('../assets/gra4.jpg')}
         style={styles.backgroundImage}>
-          <ScrollView showsVerticalScrollIndicator={false} style={{width: '100%'}}>
+          {state.loading ? <View style={{height: '100%', alignItems: 'center', justifyContent: 'center'}}><ActivityIndicator size={50} color='white' /></View> : <ScrollView refreshControl={<RefreshControl refreshing={state.loading} onRefresh={refreshData}/>} showsVerticalScrollIndicator={false} style={{width: '100%'}}>
 
             <View style={{width: '100%', alignItems: 'center'}}>
 
           <View style={{width: '90%', paddingVertical: 20, backgroundColor: 'rgba(0, 0, 0, 0.3)', borderRadius: 10, marginTop: 20, alignItems: 'center', gap: 10, boxShadow: '0px 0px 5px 0px rgba(225, 225, 225, 0.3)'}}>
               <View style={{display: 'flex', width: '85%', alignItems: 'center', justifyContent: 'space-between', flexDirection: 'row'}}>
                 <Text style={{color: 'rgb(148, 146, 146)', fontWeight: 700, fontSize: 20}}>Balance</Text>
-                <Text style={{color: 'white', fontWeight: 500, fontSize: 15}}>💰 0.00</Text>
+                <Text style={{color: 'white', fontWeight: 500, fontSize: 15}}>💰 {balance}</Text>
               </View>
           </View>
 
           <View style={{width: '90%', paddingVertical: 20, backgroundColor: 'rgba(0, 0, 0, 0.3)', borderRadius: 10, marginTop: 20, alignItems: 'center', gap: 10, boxShadow: '0px 0px 5px 0px rgba(225, 225, 225, 0.3)'}}>
               <View style={{display: 'flex', width: '85%', alignItems: 'center', justifyContent: 'space-between', flexDirection: 'row'}}>
                 <Text style={{color: 'rgb(148, 146, 146)', fontWeight: 700, fontSize: 20}}>Hash Coin/$</Text>
-                <Text style={{color: 'white', fontWeight: 500, fontSize: 15}}>1/$0.5</Text>
+                <Text style={{color: 'white', fontWeight: 500, fontSize: 15}}>1/${coinPrice.datasets[0].data[coinPrice.datasets[0].data.length-1]}</Text>
               </View>
           </View>
           
@@ -104,24 +103,27 @@ const Home = () => {
             <View style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
               <View style={{display: 'flex', width: '50%', alignItems: 'center', justifyContent: 'space-between', gap: 10}}>
                 <Text style={{color: 'rgb(148, 146, 146)', fontWeight: 700, fontSize: 20}}>Active Miners</Text>
-                <Text style={{color: 'white', fontWeight: 500, fontSize: 15}}>15 🛠️</Text>
+                <Text style={{color: 'white', fontWeight: 500, fontSize: 15}}>{miners.length} 🛠️</Text>
               </View>
               <View style={{display: 'flex', width: '50%', alignItems: 'center', justifyContent: 'space-between',}}>
                 <Text style={{color: 'rgb(148, 146, 146)', fontWeight: 700, fontSize: 20}}>Mining Rate</Text>
-                <Text style={{color: 'white', fontWeight: 500, fontSize: 15}}>15 coins/hr ⚡</Text>
+                <Text style={{color: 'white', fontWeight: 500, fontSize: 15}}>{miners.reduce((total, miner) => total + miner.hashRate, 0)} coins/hr ⚡</Text>
               </View>
             </View>
           </View>
-          {miners.map((miner) => (
+          {!miners.length ? <View style={{width: '90%', backgroundColor: 'red', height: '20%', borderRadius: 10, marginTop: 100, alignItems: 'center', justifyContent: 'center'}}><Text style={{textAlign: 'center', color: 'white', fontSize: 15, fontWeight: 500}}>You need to buy a Miner to start mining.</Text></View> :
+          miners.map((miner) => (
           <MinerCard
-          key={miner.id}
+          updateMiner={(id) => dispatch(resetCoinsMinedById(id))}
+          updateBalance={(newBalance) => dispatch(setBalance(newBalance))}
+          key={miner._id}
               miner={miner}
             />
           ))}
 
           </View>
 
-          </ScrollView>
+          </ScrollView>}
 
         </ImageBackground>
     </View>

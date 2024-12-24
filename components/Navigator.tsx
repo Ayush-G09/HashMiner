@@ -6,8 +6,9 @@ import Activity from '../views/Activity';
 import Leaderboard from '../views/Leaderboard';
 import Subscription from '../views/Subscription';
 import Header from './Header';
+import Wallet from '../views/Wallet';
 
-type RouteName = 'Home' | 'Activity' | 'Leaderboard' | 'Subscription';
+type RouteName = 'Home' | 'Activity' | 'Leaderboard' | 'Subscription' | 'Wallet';
 
 const Tab = createBottomTabNavigator();
 
@@ -35,6 +36,10 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
           active: require('../assets/installment-invoice-s.png'),
           inactive: require('../assets/installment-invoice.png'),
         },
+        Wallet: {
+          active: require('../assets/wallet-s.png'),
+          inactive: require('../assets/wallet.png'),
+        }
       };
 
 
@@ -79,7 +84,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({
 
 const Navigator: React.FC = () => {
 
-  const [state, setState] = useState<'Home' | 'Activity' | 'Leaderboard' | 'Subscription'>('Home');
+  const [state, setState] = useState<'Home' | 'Activity' | 'Leaderboard' | 'Subscription' | 'Wallet'>('Home');
 
   const handleTabChange = (e: any) => {
     if(e.target.includes('Home')){
@@ -96,6 +101,10 @@ const Navigator: React.FC = () => {
     }
     if(e.target.includes('Subscription')){
       setState('Subscription');
+      return;
+    }
+    if(e.target.includes('Wallet')){
+      setState('Wallet');
       return;
     }
   };
@@ -122,6 +131,11 @@ const Navigator: React.FC = () => {
             },
           }} />
       <Tab.Screen name="Subscription" component={Subscription} listeners={{
+            tabPress: (e) => {
+              handleTabChange(e);
+            },
+          }} />
+          <Tab.Screen name="Wallet" component={Wallet} listeners={{
             tabPress: (e) => {
               handleTabChange(e);
             },

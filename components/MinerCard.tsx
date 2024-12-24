@@ -1,40 +1,76 @@
-import React from 'react';
-import { Image, Text, TouchableOpacity, View, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { Image, Text, TouchableOpacity, View, StyleSheet, ActivityIndicator } from 'react-native';
+import { CodeType, getImageByCode, getNameByCode } from '../utils';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import Toast from 'react-native-toast-message';
 
 export type MinerCardType = {
-  id: string;
-  minerName: string;
+  _id: string;
   status: 'Running'| 'Stopped';
-  imageSource: number;
-  hashRate: string;
-  coinsMined: string;
-  capacity: string;
-  onCollectCoins: () => void;
+  type: CodeType;
+  hashRate: number;
+  coinsMined: number;
+  capacity: number;
 }
 
 type Porp = {
   miner: MinerCardType;
+  updateBalance: (newBalance: number) => void;
+  updateMiner: (id: string) => void;
 }
 
-const MinerCard = ({miner}: Porp) => {
+const MinerCard = ({miner, updateBalance, updateMiner}: Porp) => {
+
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const handleCollection = async () => {
+    const UserId = await AsyncStorage.getItem('id');
+    try {
+      setLoading(true);
+      const response = await axios.post(`https://hash-miner-backend.vercel.app/api/auth//collect-coins/${UserId}/${miner._id}`);
+      updateBalance(response.data.balance);
+      updateMiner(miner._id);
+      Toast.show({
+        type: 'success',
+        text1: 'Coins Collected',
+        text2: `You have collected ${miner.coinsMined} coins`,
+      });
+    } catch (error) {
+      console.error('Error collecting coins:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Unable Coins Collected',
+      });
+    }finally{
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.minerName}>{miner.minerName}</Text>
-        <Text style={{...styles.minerStatus, color: miner.status === 'Running' ? 'green' : 'red'}}>{miner.status}</Text>
+        <Text style={styles.minerName}>{getNameByCode(miner.type)}</Text>
+        <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 10}}>
+          <Text style={{...styles.minerStatus, color: miner.status === 'Running' ? 'green' : 'red'}}>{miner.status}</Text>
+          <View style={{alignItems: 'center', justifyContent: 'center', padding: 1, backgroundColor: 'white', borderRadius: 5, overflow: 'hidden'}}>
+            <Image source={miner.status === 'Running' ? require('../assets/management.gif') : require('../assets/forbidden-sign.gif')} style={{width: 30, height: 30}} />
+          </View>
+        </View>
       </View>
 
       <View style={styles.imageContainer}>
-        <Image source={miner.imageSource} style={styles.minerImage} />
+        <Image source={getImageByCode(miner.type)} style={styles.minerImage} />
       </View>
 
       <InfoRow title="Hash Rate" value={miner.hashRate} />
       <InfoRow title="Coins Mined" value={miner.coinsMined} />
       <InfoRow title="Capacity" value={miner.capacity} />
 
-      <TouchableOpacity activeOpacity={0.7} style={styles.button} onPress={miner.onCollectCoins}>
-        <Text style={styles.buttonText}>Collect Coins</Text>
-      </TouchableOpacity>
+      {!(miner.coinsMined === 0) && <TouchableOpacity activeOpacity={0.7} style={styles.button} onPress={handleCollection}>
+        {loading ? <ActivityIndicator size='small' color='white'/> :
+        <Text style={styles.buttonText}>Collect Coins</Text>}
+      </TouchableOpacity>}
     </View>
   );
 };
@@ -42,7 +78,7 @@ const MinerCard = ({miner}: Porp) => {
 // Reusable InfoRow Component for displaying information
 interface InfoRowProps {
   title: string;
-  value: string;
+  value: number;
 }
 
 const InfoRow: React.FC<InfoRowProps> = ({ title, value }) => (
@@ -86,10 +122,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginVertical: 10,
-    shadowColor: 'rgba(0, 0, 0, 0.4)',
-    shadowOpacity: 0.4,
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 15,
   },
   minerImage: {
     width: 250,
