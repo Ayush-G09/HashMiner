@@ -10,6 +10,9 @@ import {
 import React, {useEffect, useState} from 'react';
 import axiosInstance from '../axios/axiosConfig';
 import Toast from 'react-native-toast-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../App';
 
 type State = {
   loading: boolean;
@@ -21,7 +24,9 @@ type State = {
   }[];
 };
 
-const Leaderboard = () => {
+type Props = NativeStackScreenProps<RootStackParamList, 'Leaderboard'>;
+
+const Leaderboard = ({navigation}: Props) => {
   const [state, setState] = useState<State>({
     loading: false,
     data: [],
@@ -29,14 +34,24 @@ const Leaderboard = () => {
 
   const fetchData = async () => {
     try {
+      const token = await AsyncStorage.getItem('userToken');
       setState(prev => ({...prev, loading: true}));
-      const response = await axiosInstance.get(`/auth/leaderboard`);
+      const response = await axiosInstance.get(`/auth/leaderboard`,{headers: {Authorization: `Bearer ${token}`}});
       setState(prev => ({...prev, data: response.data.data}));
     } catch (err: any) {
-      Toast.show({
-        type: 'error',
-        text1: err.response.data.message,
-      });
+      if(err.response.data.message === 'Invalid token.'){
+        await AsyncStorage.removeItem('userToken');
+        await AsyncStorage.removeItem('username');
+        await AsyncStorage.removeItem('email');
+        await AsyncStorage.removeItem('id');
+        await AsyncStorage.removeItem('image');
+        navigation.navigate('Auth');
+      }else{
+        Toast.show({
+          type: 'error',
+          text1: err.response.data.message,
+        });
+      }
     } finally {
       setState(prev => ({...prev, loading: false}));
     }

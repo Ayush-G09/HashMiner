@@ -106,9 +106,10 @@ const Header = () => {
         try {
           setState(prev => ({...prev, updatingImage: true}));
           const userId = await AsyncStorage.getItem('id');
+          const token = await AsyncStorage.getItem('userToken');
           await axiosInstance.post(`/auth/user/${userId}/image`, {
             image: dataUri,
-          });
+          }, {headers: {Authorization: `Bearer ${token}`}});
           setPhoto(dataUri);
           await AsyncStorage.setItem('image', dataUri);
           Toast.show({
@@ -117,10 +118,19 @@ const Header = () => {
             text2: 'Your profile picture has been updated successfully.',
           });
         } catch (err: any) {
-          Toast.show({
-            type: 'error',
-            text1: err.response.data.message,
-          });
+          if(err.response.data.message === 'Invalid token.'){
+            await AsyncStorage.removeItem('userToken');
+            await AsyncStorage.removeItem('username');
+            await AsyncStorage.removeItem('email');
+            await AsyncStorage.removeItem('id');
+            await AsyncStorage.removeItem('image');
+            navigation.navigate('Auth');
+          }else{
+            Toast.show({
+              type: 'error',
+              text1: err.response.data.message,
+            });
+          }
         } finally {
           setState(prev => ({...prev, updatingImage: false}));
         }

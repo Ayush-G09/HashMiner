@@ -16,6 +16,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import {setBalance} from '../store/minerSlice';
 import axiosInstance from '../axios/axiosConfig';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../App';
 
 type State = {
   loading: boolean;
@@ -35,7 +37,9 @@ type State = {
   transactionLoading: boolean;
 };
 
-const Wallet = () => {
+type Props = NativeStackScreenProps<RootStackParamList, 'Wallet'>;
+
+const Wallet = ({navigation}: Props) => {
   const [state, setState] = useState<State>({
     loading: false,
     amount: 0,
@@ -64,6 +68,7 @@ const Wallet = () => {
         } else {
           try {
             const userId = await AsyncStorage.getItem('id');
+            const token = await AsyncStorage.getItem('userToken');
             setState(prev => ({...prev, loading: true}));
             const data = {
               userId: userId,
@@ -74,6 +79,7 @@ const Wallet = () => {
             const response = await axiosInstance.post(
               `/auth/transaction`,
               data,
+              {headers: {Authorization: `Bearer ${token}`}}
             );
             setState(prev => ({
               ...prev,
@@ -83,10 +89,19 @@ const Wallet = () => {
             dispatch(setBalance(balance - state.amount));
             amountInputRef.current?.blur();
           } catch (err: any) {
-            Toast.show({
-              type: 'error',
-              text1: err.response.data.message,
-            });
+            if(err.response.data.message === 'Invalid token.'){
+              await AsyncStorage.removeItem('userToken');
+              await AsyncStorage.removeItem('username');
+              await AsyncStorage.removeItem('email');
+              await AsyncStorage.removeItem('id');
+              await AsyncStorage.removeItem('image');
+              navigation.navigate('Auth');
+            }else{
+              Toast.show({
+                type: 'error',
+                text1: err.response.data.message,
+              });
+            }
           } finally {
             setState(prev => ({...prev, loading: false}));
           }
@@ -106,17 +121,27 @@ const Wallet = () => {
     try {
       setState(prev => ({...prev, transactionLoading: true}));
       const userId = await AsyncStorage.getItem('id');
-      const response = await axiosInstance.get(`/auth/transactions/${userId}`);
+      const token = await AsyncStorage.getItem('userToken');
+      const response = await axiosInstance.get(`/auth/transactions/${userId}`, {headers: {Authorization: `Bearer ${token}`}});
       setState(prev => ({
         ...prev,
         upiId: response.data.upiId,
         transaction: response.data.transactions,
       }));
     } catch (err: any) {
-      Toast.show({
-        type: 'error',
-        text1: err.response.data.message,
-      });
+      if(err.response.data.message === 'Invalid token.'){
+        await AsyncStorage.removeItem('userToken');
+        await AsyncStorage.removeItem('username');
+        await AsyncStorage.removeItem('email');
+        await AsyncStorage.removeItem('id');
+        await AsyncStorage.removeItem('image');
+        navigation.navigate('Auth');
+      }else{
+        Toast.show({
+          type: 'error',
+          text1: err.response.data.message,
+        });
+      }
     } finally {
       setState(prev => ({...prev, transactionLoading: false}));
     }
@@ -131,14 +156,24 @@ const Wallet = () => {
       try {
         setState(prev => ({...prev, upiLoading: true}));
         const userId = await AsyncStorage.getItem('id');
+        const token = await AsyncStorage.getItem('userToken');
         const data = {userId: userId, upiID: state.upiId};
-        await axiosInstance.put('/auth/user/upi', data);
+        await axiosInstance.put('/auth/user/upi', data, {headers: {Authorization: `Bearer ${token}`}});
         setState(prev => ({...prev, editing: false}));
       } catch (err: any) {
-        Toast.show({
-          type: 'error',
-          text1: err.response.data.message,
-        });
+        if(err.response.data.message === 'Invalid token.'){
+          await AsyncStorage.removeItem('userToken');
+          await AsyncStorage.removeItem('username');
+          await AsyncStorage.removeItem('email');
+          await AsyncStorage.removeItem('id');
+          await AsyncStorage.removeItem('image');
+          navigation.navigate('Auth');
+        }else{
+          Toast.show({
+            type: 'error',
+            text1: err.response.data.message,
+          });
+        }
       } finally {
         setState(prev => ({...prev, upiLoading: false}));
       }

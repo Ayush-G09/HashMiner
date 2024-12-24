@@ -23,6 +23,7 @@ export type RootStackParamList = {
   Subscription: undefined;
   Layout: undefined;
   Splash: undefined;
+  Wallet: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

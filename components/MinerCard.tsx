@@ -11,6 +11,9 @@ import {CodeType, getImageByCode, getNameByCode} from '../utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import axiosInstance from '../axios/axiosConfig';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../App';
 
 export type MinerCardType = {
   _id: string;
@@ -29,13 +32,16 @@ type Porp = {
 
 const MinerCard = ({miner, updateBalance, updateMiner}: Porp) => {
   const [loading, setLoading] = useState<boolean>(false);
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const handleCollection = async () => {
-    const UserId = await AsyncStorage.getItem('id');
     try {
       setLoading(true);
+      const UserId = await AsyncStorage.getItem('id');
+      const token = await AsyncStorage.getItem('userToken');
+      console.log({token: `/auth/collect-coins/${UserId}/${miner._id}`, a: {headers: {Authorization: `Bearer ${token}`}}})
       const response = await axiosInstance.post(
-        `/auth/collect-coins/${UserId}/${miner._id}`,
+        `/auth/collect-coins/${UserId}/${miner._id}`, {}, {headers: {Authorization: `Bearer ${token}`}}
       );
       updateBalance(response.data.balance);
       updateMiner(miner._id);
@@ -44,11 +50,20 @@ const MinerCard = ({miner, updateBalance, updateMiner}: Porp) => {
         text1: 'Coins Collected',
         text2: `You have collected ${miner.coinsMined} coins`,
       });
-    } catch (error: any) {
-      Toast.show({
-        type: 'error',
-        text1: error.response.data.message,
-      });
+    } catch (err: any) {
+      if(err.response.data.message === 'Invalid token.'){
+        await AsyncStorage.removeItem('userToken');
+        await AsyncStorage.removeItem('username');
+        await AsyncStorage.removeItem('email');
+        await AsyncStorage.removeItem('id');
+        await AsyncStorage.removeItem('image');
+        navigation.navigate('Auth');
+      }else{
+        Toast.show({
+          type: 'error',
+          text1: err.response.data.message,
+        });
+      }
     } finally {
       setLoading(false);
     }

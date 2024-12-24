@@ -22,13 +22,17 @@ import {
 import {RootState} from '../store/store';
 import axiosInstance from '../axios/axiosConfig';
 import Toast from 'react-native-toast-message';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../App';
 
 type State = {
   loading: boolean;
   backPressedOnce: boolean;
 };
 
-const Home = () => {
+type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+
+const Home = ({navigation}: Props) => {
   const dispatch = useDispatch();
   const {balance, miners, coinPrice} = useSelector(
     (state: RootState) => state.miner,
@@ -65,15 +69,25 @@ const Home = () => {
   const fetchData = async () => {
     try {
       const userId = await AsyncStorage.getItem('id');
+      const token = await AsyncStorage.getItem('userToken');
       setState(prev => ({...prev, loading: true}));
-      const response = await axiosInstance.get(`/auth/user/${userId}`);
+      const response = await axiosInstance.get(`/auth/user/${userId}`, {headers: {Authorization: `Bearer ${token}`}});
       dispatch(setMiners(response.data.user.miners));
       dispatch(setBalance(response.data.user.balance));
     } catch (err: any) {
-      Toast.show({
-        type: 'error',
-        text1: err.response.data.message,
-      });
+      if(err.response.data.message === 'Invalid token.'){
+        await AsyncStorage.removeItem('userToken');
+        await AsyncStorage.removeItem('username');
+        await AsyncStorage.removeItem('email');
+        await AsyncStorage.removeItem('id');
+        await AsyncStorage.removeItem('image');
+        navigation.navigate('Auth');
+      }else{
+        Toast.show({
+          type: 'error',
+          text1: err.response.data.message,
+        });
+      }
     } finally {
       setState(prev => ({...prev, loading: false}));
     }
@@ -81,13 +95,23 @@ const Home = () => {
 
   const fetchCoinPrice = async () => {
     try {
-      const response = await axiosInstance.get(`/auth/get-coin-price`);
+      const token = await AsyncStorage.getItem('userToken');
+      const response = await axiosInstance.get(`/auth/get-coin-price`, {headers: {Authorization: `Bearer ${token}`}});
       dispatch(setCoinPrice(response.data));
     } catch (err: any) {
-      Toast.show({
-        type: 'error',
-        text1: err.response.data.message,
-      });
+      if(err.response.data.message === 'Invalid token.'){
+        await AsyncStorage.removeItem('userToken');
+        await AsyncStorage.removeItem('username');
+        await AsyncStorage.removeItem('email');
+        await AsyncStorage.removeItem('id');
+        await AsyncStorage.removeItem('image');
+        navigation.navigate('Auth');
+      }else{
+        Toast.show({
+          type: 'error',
+          text1: err.response.data.message,
+        });
+      }
     }
   };
 
