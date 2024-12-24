@@ -106,10 +106,9 @@ const Header = () => {
         try {
           setState(prev => ({...prev, updatingImage: true}));
           const userId = await AsyncStorage.getItem('id');
-          await axiosInstance.post(
-            `/auth/user/${userId}/image`,
-            {image: dataUri},
-          );
+          await axiosInstance.post(`/auth/user/${userId}/image`, {
+            image: dataUri,
+          });
           setPhoto(dataUri);
           await AsyncStorage.setItem('image', dataUri);
           Toast.show({
@@ -117,10 +116,10 @@ const Header = () => {
             text1: 'Profile Picture Updated',
             text2: 'Your profile picture has been updated successfully.',
           });
-        } catch (error) {
+        } catch (err: any) {
           Toast.show({
             type: 'error',
-            text1: 'Error Updating Picture',
+            text1: err.response.data.message,
           });
         } finally {
           setState(prev => ({...prev, updatingImage: false}));

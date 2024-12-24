@@ -44,11 +44,10 @@ const MinerCard = ({miner, updateBalance, updateMiner}: Porp) => {
         text1: 'Coins Collected',
         text2: `You have collected ${miner.coinsMined} coins`,
       });
-    } catch (error) {
-      console.error('Error collecting coins:', error);
+    } catch (error: any) {
       Toast.show({
         type: 'error',
-        text1: 'Unable Coins Collected',
+        text1: error.response.data.message,
       });
     } finally {
       setLoading(false);

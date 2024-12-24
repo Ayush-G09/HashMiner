@@ -82,8 +82,11 @@ const Wallet = () => {
             }));
             dispatch(setBalance(balance - state.amount));
             amountInputRef.current?.blur();
-          } catch (error) {
-            console.error('Error fetching data:', error);
+          } catch (err: any) {
+            Toast.show({
+              type: 'error',
+              text1: err.response.data.message,
+            });
           } finally {
             setState(prev => ({...prev, loading: false}));
           }
@@ -103,16 +106,17 @@ const Wallet = () => {
     try {
       setState(prev => ({...prev, transactionLoading: true}));
       const userId = await AsyncStorage.getItem('id');
-      const response = await axiosInstance.get(
-        `/auth/transactions/${userId}`,
-      );
+      const response = await axiosInstance.get(`/auth/transactions/${userId}`);
       setState(prev => ({
         ...prev,
         upiId: response.data.upiId,
         transaction: response.data.transactions,
       }));
-    } catch (error) {
-      console.error('Error fetching data:', error);
+    } catch (err: any) {
+      Toast.show({
+        type: 'error',
+        text1: err.response.data.message,
+      });
     } finally {
       setState(prev => ({...prev, transactionLoading: false}));
     }
@@ -128,13 +132,13 @@ const Wallet = () => {
         setState(prev => ({...prev, upiLoading: true}));
         const userId = await AsyncStorage.getItem('id');
         const data = {userId: userId, upiID: state.upiId};
-        await axiosInstance.put(
-          '/auth/user/upi',
-          data,
-        );
+        await axiosInstance.put('/auth/user/upi', data);
         setState(prev => ({...prev, editing: false}));
-      } catch (error) {
-        console.error('erroe', error);
+      } catch (err: any) {
+        Toast.show({
+          type: 'error',
+          text1: err.response.data.message,
+        });
       } finally {
         setState(prev => ({...prev, upiLoading: false}));
       }

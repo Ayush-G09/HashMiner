@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import axiosInstance from '../axios/axiosConfig';
+import Toast from 'react-native-toast-message';
 
 type State = {
   loading: boolean;
@@ -29,12 +30,13 @@ const Leaderboard = () => {
   const fetchData = async () => {
     try {
       setState(prev => ({...prev, loading: true}));
-      const response = await axiosInstance.get(
-        `/auth/leaderboard`,
-      );
+      const response = await axiosInstance.get(`/auth/leaderboard`);
       setState(prev => ({...prev, data: response.data.data}));
-    } catch (error) {
-      console.error('Error fetching data:', error);
+    } catch (err: any) {
+      Toast.show({
+        type: 'error',
+        text1: err.response.data.message,
+      });
     } finally {
       setState(prev => ({...prev, loading: false}));
     }

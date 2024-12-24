@@ -105,10 +105,7 @@ const Auth = ({navigation}: Props) => {
 
     try {
       setState(prev => ({...prev, loading: true}));
-      const response = await axiosInstance.post(
-        '/auth/login',
-        data,
-      );
+      const response = await axiosInstance.post('/auth/login', data);
       await AsyncStorage.setItem('userToken', response.data.token);
       await AsyncStorage.setItem('username', response.data.user.username);
       await AsyncStorage.setItem('email', response.data.user.email);
@@ -125,8 +122,11 @@ const Auth = ({navigation}: Props) => {
         visibilityTime: 2000,
       });
       navigation.navigate('Layout');
-    } catch (error) {
-      console.error('Error logging in:', error);
+    } catch (error: any) {
+      Toast.show({
+        type: 'error',
+        text1: error.response.data.message,
+      });
     } finally {
       setState(prev => ({...prev, loading: false}));
     }
@@ -172,7 +172,6 @@ const Auth = ({navigation}: Props) => {
       );
 
       const data = response.data;
-      console.log({otp: data.otp});
       // Update the state on successful OTP send
       setState(prev => ({
         ...prev,
@@ -194,7 +193,6 @@ const Auth = ({navigation}: Props) => {
   };
 
   const verifyOtp = () => {
-    console.log({otp: state.validOtp.value, otpEntered: state.otp.join('')});
     if (state.otp.join('') === state.validOtp.value) {
       setState(prev => ({
         ...prev,
@@ -276,38 +274,38 @@ const Auth = ({navigation}: Props) => {
         email: state.resetPassEmail.value,
         newPassword: state.resetPass.value,
       };
-      await axiosInstance.post(
-        '/auth/reset-password',
-        data,
-      );
+      await axiosInstance.post('/auth/reset-password', data);
       Toast.show({
         type: 'success',
         text1: 'Password changed successfully',
       });
       setState(prev => ({...prev, forgotPassword: false}));
     } catch (err: any) {
-      console.error({error: err.response.data});
+      Toast.show({
+        type: 'error',
+        text1: err.response.data.message,
+      });
     } finally {
       setState(prev => ({...prev, resetPassloading: false}));
     }
   };
 
   useEffect(() => {
-      let interval: NodeJS.Timeout | undefined;
-  
-      if (state.isTimerRunning && state.timer > 0) {
-        // Start the countdown
-        interval = setInterval(() => {
-          setState(prev => ({...prev, timer: state.timer - 1}));
-        }, 1000);
-      } else if (state.timer === 0) {
-        // When timer ends, stop the countdown
-        setState(prev => ({...prev, isTimerRunning: false}));
-        clearInterval(interval);
-      }
-  
-      return () => clearInterval(interval); // Cleanup interval
-    }, [state.isTimerRunning, state.timer]);
+    let interval: NodeJS.Timeout | undefined;
+
+    if (state.isTimerRunning && state.timer > 0) {
+      // Start the countdown
+      interval = setInterval(() => {
+        setState(prev => ({...prev, timer: state.timer - 1}));
+      }, 1000);
+    } else if (state.timer === 0) {
+      // When timer ends, stop the countdown
+      setState(prev => ({...prev, isTimerRunning: false}));
+      clearInterval(interval);
+    }
+
+    return () => clearInterval(interval); // Cleanup interval
+  }, [state.isTimerRunning, state.timer]);
 
   return (
     <View style={styles.container}>
@@ -316,12 +314,32 @@ const Auth = ({navigation}: Props) => {
         style={styles.backgroundImage}>
         <Modal isVisible={state.forgotPassword}>
           <View style={styles.modalContainer}>
-            <View style={{width: '100%', display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-              <Text style={{width: '95%', color: 'white', fontSize: 20, fontWeight: 600, textAlign: 'center'}}>
+            <View
+              style={{
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <Text
+                style={{
+                  width: '95%',
+                  color: 'white',
+                  fontSize: 20,
+                  fontWeight: 600,
+                  textAlign: 'center',
+                }}>
                 Reset Password
               </Text>
-              <TouchableOpacity activeOpacity={0.7} style={{paddingHorizontal: 5}} onPress={() => setState((prev) => ({...prev, forgotPassword: false}))}>
-                <Text style={{color: 'red', fontSize: 20, fontWeight: 800}}>X</Text>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                style={{paddingHorizontal: 5}}
+                onPress={() =>
+                  setState(prev => ({...prev, forgotPassword: false}))
+                }>
+                <Text style={{color: 'red', fontSize: 20, fontWeight: 800}}>
+                  X
+                </Text>
               </TouchableOpacity>
             </View>
             <TextInput

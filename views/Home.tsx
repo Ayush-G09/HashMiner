@@ -21,6 +21,7 @@ import {
 } from '../store/minerSlice';
 import {RootState} from '../store/store';
 import axiosInstance from '../axios/axiosConfig';
+import Toast from 'react-native-toast-message';
 
 type State = {
   loading: boolean;
@@ -65,13 +66,14 @@ const Home = () => {
     try {
       const userId = await AsyncStorage.getItem('id');
       setState(prev => ({...prev, loading: true}));
-      const response = await axiosInstance.get(
-        `/auth/user/${userId}`,
-      );
+      const response = await axiosInstance.get(`/auth/user/${userId}`);
       dispatch(setMiners(response.data.user.miners));
       dispatch(setBalance(response.data.user.balance));
-    } catch (error) {
-      console.error('Error fetching data:', error);
+    } catch (err: any) {
+      Toast.show({
+        type: 'error',
+        text1: err.response.data.message,
+      });
     } finally {
       setState(prev => ({...prev, loading: false}));
     }
@@ -79,12 +81,13 @@ const Home = () => {
 
   const fetchCoinPrice = async () => {
     try {
-      const response = await axiosInstance.get(
-        `/auth/get-coin-price`,
-      );
+      const response = await axiosInstance.get(`/auth/get-coin-price`);
       dispatch(setCoinPrice(response.data));
-    } catch (error) {
-      console.error('Error fetching data:', error);
+    } catch (err: any) {
+      Toast.show({
+        type: 'error',
+        text1: err.response.data.message,
+      });
     }
   };
 

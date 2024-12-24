@@ -159,13 +159,11 @@ const Register = ({navigation}: Props) => {
         ...prev,
         validOtp: {...prev.validOtp, loading: true},
       }));
-      const response = await axiosInstance.post(
-        '/auth/send-otp',
-        {email: state.email.value},
-      );
+      const response = await axiosInstance.post('/auth/send-otp', {
+        email: state.email.value,
+      });
 
       const data = response.data;
-      console.log({otp: data.otp});
       // Update the state on successful OTP send
       setState(prev => ({...prev, timer: 120}));
       setState(prev => ({
@@ -187,7 +185,6 @@ const Register = ({navigation}: Props) => {
   };
 
   const verifyOtp = () => {
-    console.log({otp: state.validOtp.value, otpEntered: state.otp.join('')});
     if (state.otp.join('') === state.validOtp.value) {
       setState(prev => ({
         ...prev,
@@ -256,18 +253,18 @@ const Register = ({navigation}: Props) => {
 
     try {
       setState(prev => ({...prev, signupLoading: true}));
-      await axiosInstance.post(
-        '/auth/register',
-        data,
-      );
+      await axiosInstance.post('/auth/register', data);
       Toast.show({
         type: 'success',
         text1: 'User registered successfully! 🎉',
         visibilityTime: 2000,
       });
       navigation.navigate('Auth');
-    } catch (error) {
-      console.error('Failed to register', error);
+    } catch (error: any) {
+      Toast.show({
+        type: 'error',
+        text1: error.response.data.message,
+      });
     } finally {
       setState(prev => ({...prev, signupLoading: false}));
     }
