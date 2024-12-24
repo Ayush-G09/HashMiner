@@ -1,21 +1,37 @@
-import {ActivityIndicator, BackHandler, ImageBackground, RefreshControl, ScrollView, StyleSheet, Text, ToastAndroid, View} from 'react-native';
-import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  BackHandler,
+  ImageBackground,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  View,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import MinerCard from '../components/MinerCard';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useDispatch, useSelector } from 'react-redux';
-import { resetCoinsMinedById, setBalance, setCoinPrice, setMiners } from '../store/minerSlice';
-import { RootState } from '../store/store';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  resetCoinsMinedById,
+  setBalance,
+  setCoinPrice,
+  setMiners,
+} from '../store/minerSlice';
+import {RootState} from '../store/store';
 
 type State = {
   loading: boolean;
   backPressedOnce: boolean;
-}
+};
 
 const Home = () => {
-
   const dispatch = useDispatch();
-  const { balance, miners, coinPrice } = useSelector((state: RootState) => state.miner);
+  const {balance, miners, coinPrice} = useSelector(
+    (state: RootState) => state.miner,
+  );
 
   const [state, setState] = useState<State>({
     loading: false,
@@ -27,38 +43,45 @@ const Home = () => {
       if (state.backPressedOnce) {
         BackHandler.exitApp(); // Exit app on the second press
       } else {
-        setState((prev) => ({...prev, backPressedOnce: true}));
-        ToastAndroid.show("Press again to exit", ToastAndroid.SHORT);
+        setState(prev => ({...prev, backPressedOnce: true}));
+        ToastAndroid.show('Press again to exit', ToastAndroid.SHORT);
 
         // Reset the back press flag after 2 seconds
-        setTimeout(() => setState((prev) => ({...prev, backPressedOnce: false})), 2000);
+        setTimeout(
+          () => setState(prev => ({...prev, backPressedOnce: false})),
+          2000,
+        );
       }
       return true;
     };
 
     BackHandler.addEventListener('hardwareBackPress', backAction);
 
-    return () => BackHandler.removeEventListener('hardwareBackPress', backAction);
+    return () =>
+      BackHandler.removeEventListener('hardwareBackPress', backAction);
   }, [state.backPressedOnce]);
-
 
   const fetchData = async () => {
     try {
-      const userId = await AsyncStorage.getItem("id");
-      setState((prev) => ({...prev, loading: true}));
-      const response = await axios.get(`https://hash-miner-backend.vercel.app/api/auth/user/${userId}`);
+      const userId = await AsyncStorage.getItem('id');
+      setState(prev => ({...prev, loading: true}));
+      const response = await axios.get(
+        `https://hash-miner-backend.vercel.app/api/auth/user/${userId}`,
+      );
       dispatch(setMiners(response.data.user.miners));
       dispatch(setBalance(response.data.user.balance));
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
-      setState((prev) => ({...prev, loading: false}));
+      setState(prev => ({...prev, loading: false}));
     }
   };
 
   const fetchCoinPrice = async () => {
     try {
-      const response = await axios.get(`https://hash-miner-backend.vercel.app/api/auth/get-coin-price`);
+      const response = await axios.get(
+        `https://hash-miner-backend.vercel.app/api/auth/get-coin-price`,
+      );
       dispatch(setCoinPrice(response.data));
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -74,58 +97,205 @@ const Home = () => {
   const refreshData = () => {
     fetchData();
     fetchCoinPrice();
-  }
+  };
 
   return (
     <View style={styles.container}>
       <ImageBackground
         source={require('../assets/gra4.jpg')}
         style={styles.backgroundImage}>
-          {state.loading ? <View style={{height: '100%', alignItems: 'center', justifyContent: 'center'}}><ActivityIndicator size={50} color='white' /></View> : <ScrollView refreshControl={<RefreshControl refreshing={state.loading} onRefresh={refreshData}/>} showsVerticalScrollIndicator={false} style={{width: '100%'}}>
-
+        {state.loading ? (
+          <View
+            style={{
+              height: '100%',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <ActivityIndicator size={50} color="white" />
+          </View>
+        ) : (
+          <ScrollView
+            refreshControl={
+              <RefreshControl
+                refreshing={state.loading}
+                onRefresh={refreshData}
+              />
+            }
+            showsVerticalScrollIndicator={false}
+            style={{width: '100%'}}>
             <View style={{width: '100%', alignItems: 'center'}}>
+              <View
+                style={{
+                  width: '90%',
+                  paddingVertical: 20,
+                  backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                  borderRadius: 10,
+                  marginTop: 20,
+                  alignItems: 'center',
+                  gap: 10,
+                  boxShadow: '0px 0px 5px 0px rgba(225, 225, 225, 0.3)',
+                }}>
+                <View
+                  style={{
+                    display: 'flex',
+                    width: '85%',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexDirection: 'row',
+                  }}>
+                  <Text
+                    style={{
+                      color: 'rgb(148, 146, 146)',
+                      fontWeight: 700,
+                      fontSize: 20,
+                    }}>
+                    Balance
+                  </Text>
+                  <Text style={{color: 'white', fontWeight: 500, fontSize: 15}}>
+                    💰 {balance}
+                  </Text>
+                </View>
+              </View>
 
-          <View style={{width: '90%', paddingVertical: 20, backgroundColor: 'rgba(0, 0, 0, 0.3)', borderRadius: 10, marginTop: 20, alignItems: 'center', gap: 10, boxShadow: '0px 0px 5px 0px rgba(225, 225, 225, 0.3)'}}>
-              <View style={{display: 'flex', width: '85%', alignItems: 'center', justifyContent: 'space-between', flexDirection: 'row'}}>
-                <Text style={{color: 'rgb(148, 146, 146)', fontWeight: 700, fontSize: 20}}>Balance</Text>
-                <Text style={{color: 'white', fontWeight: 500, fontSize: 15}}>💰 {balance}</Text>
+              <View
+                style={{
+                  width: '90%',
+                  paddingVertical: 20,
+                  backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                  borderRadius: 10,
+                  marginTop: 20,
+                  alignItems: 'center',
+                  gap: 10,
+                  boxShadow: '0px 0px 5px 0px rgba(225, 225, 225, 0.3)',
+                }}>
+                <View
+                  style={{
+                    display: 'flex',
+                    width: '85%',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexDirection: 'row',
+                  }}>
+                  <Text
+                    style={{
+                      color: 'rgb(148, 146, 146)',
+                      fontWeight: 700,
+                      fontSize: 20,
+                    }}>
+                    Hash Coin/$
+                  </Text>
+                  <Text style={{color: 'white', fontWeight: 500, fontSize: 15}}>
+                    1/$
+                    {
+                      coinPrice.datasets[0].data[
+                        coinPrice.datasets[0].data.length - 1
+                      ]
+                    }
+                  </Text>
+                </View>
               </View>
-          </View>
 
-          <View style={{width: '90%', paddingVertical: 20, backgroundColor: 'rgba(0, 0, 0, 0.3)', borderRadius: 10, marginTop: 20, alignItems: 'center', gap: 10, boxShadow: '0px 0px 5px 0px rgba(225, 225, 225, 0.3)'}}>
-              <View style={{display: 'flex', width: '85%', alignItems: 'center', justifyContent: 'space-between', flexDirection: 'row'}}>
-                <Text style={{color: 'rgb(148, 146, 146)', fontWeight: 700, fontSize: 20}}>Hash Coin/$</Text>
-                <Text style={{color: 'white', fontWeight: 500, fontSize: 15}}>1/${coinPrice.datasets[0].data[coinPrice.datasets[0].data.length-1]}</Text>
+              <View
+                style={{
+                  width: '90%',
+                  paddingVertical: 20,
+                  backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                  borderRadius: 10,
+                  marginTop: 20,
+                  alignItems: 'center',
+                  gap: 10,
+                  boxShadow: '0px 0px 5px 0px rgba(225, 225, 225, 0.3)',
+                }}>
+                <View
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    flexDirection: 'row',
+                  }}>
+                  <View
+                    style={{
+                      display: 'flex',
+                      width: '50%',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 10,
+                    }}>
+                    <Text
+                      style={{
+                        color: 'rgb(148, 146, 146)',
+                        fontWeight: 700,
+                        fontSize: 20,
+                      }}>
+                      Active Miners
+                    </Text>
+                    <Text
+                      style={{color: 'white', fontWeight: 500, fontSize: 15}}>
+                      {miners.length} 🛠️
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      display: 'flex',
+                      width: '50%',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}>
+                    <Text
+                      style={{
+                        color: 'rgb(148, 146, 146)',
+                        fontWeight: 700,
+                        fontSize: 20,
+                      }}>
+                      Mining Rate
+                    </Text>
+                    <Text
+                      style={{color: 'white', fontWeight: 500, fontSize: 15}}>
+                      {miners.reduce(
+                        (total, miner) => total + miner.hashRate,
+                        0,
+                      )}{' '}
+                      coins/hr ⚡
+                    </Text>
+                  </View>
+                </View>
               </View>
-          </View>
-          
-          <View style={{width: '90%', paddingVertical: 20, backgroundColor: 'rgba(0, 0, 0, 0.3)', borderRadius: 10, marginTop: 20, alignItems: 'center', gap: 10, boxShadow: '0px 0px 5px 0px rgba(225, 225, 225, 0.3)'}}>
-            <View style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
-              <View style={{display: 'flex', width: '50%', alignItems: 'center', justifyContent: 'space-between', gap: 10}}>
-                <Text style={{color: 'rgb(148, 146, 146)', fontWeight: 700, fontSize: 20}}>Active Miners</Text>
-                <Text style={{color: 'white', fontWeight: 500, fontSize: 15}}>{miners.length} 🛠️</Text>
-              </View>
-              <View style={{display: 'flex', width: '50%', alignItems: 'center', justifyContent: 'space-between',}}>
-                <Text style={{color: 'rgb(148, 146, 146)', fontWeight: 700, fontSize: 20}}>Mining Rate</Text>
-                <Text style={{color: 'white', fontWeight: 500, fontSize: 15}}>{miners.reduce((total, miner) => total + miner.hashRate, 0)} coins/hr ⚡</Text>
-              </View>
+              {!miners.length ? (
+                <View
+                  style={{
+                    width: '90%',
+                    backgroundColor: 'red',
+                    height: '20%',
+                    borderRadius: 10,
+                    marginTop: 100,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <Text
+                    style={{
+                      textAlign: 'center',
+                      color: 'white',
+                      fontSize: 15,
+                      fontWeight: 500,
+                    }}>
+                    You need to buy a Miner to start mining.
+                  </Text>
+                </View>
+              ) : (
+                miners.map(miner => (
+                  <MinerCard
+                    updateMiner={id => dispatch(resetCoinsMinedById(id))}
+                    updateBalance={newBalance =>
+                      dispatch(setBalance(newBalance))
+                    }
+                    key={miner._id}
+                    miner={miner}
+                  />
+                ))
+              )}
             </View>
-          </View>
-          {!miners.length ? <View style={{width: '90%', backgroundColor: 'red', height: '20%', borderRadius: 10, marginTop: 100, alignItems: 'center', justifyContent: 'center'}}><Text style={{textAlign: 'center', color: 'white', fontSize: 15, fontWeight: 500}}>You need to buy a Miner to start mining.</Text></View> :
-          miners.map((miner) => (
-          <MinerCard
-          updateMiner={(id) => dispatch(resetCoinsMinedById(id))}
-          updateBalance={(newBalance) => dispatch(setBalance(newBalance))}
-          key={miner._id}
-              miner={miner}
-            />
-          ))}
-
-          </View>
-
-          </ScrollView>}
-
-        </ImageBackground>
+          </ScrollView>
+        )}
+      </ImageBackground>
     </View>
   );
 };
@@ -160,6 +330,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontSize: 20,
-    fontWeight: 600
-  }
+    fontWeight: 600,
+  },
 });

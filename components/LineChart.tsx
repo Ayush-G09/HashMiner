@@ -1,15 +1,24 @@
 import React from 'react';
-import { View, Dimensions } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store/store';
+import {View, Dimensions} from 'react-native';
+import {LineChart} from 'react-native-chart-kit';
+import {useSelector} from 'react-redux';
+import {RootState} from '../store/store';
 
 const MyLineChart = () => {
-
-  const { coinPrice } = useSelector((state: RootState) => state.miner);
+  const {coinPrice} = useSelector((state: RootState) => state.miner);
 
   return (
-    <View style={{backgroundColor: 'black', marginTop: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingVertical: 15, borderRadius: 10, boxShadow: '0px 0px 5px 0px rgba(225, 225, 225, 0.3)'}}>
+    <View
+      style={{
+        backgroundColor: 'black',
+        marginTop: 40,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 15,
+        borderRadius: 10,
+        boxShadow: '0px 0px 5px 0px rgba(225, 225, 225, 0.3)',
+      }}>
       <LineChart
         data={coinPrice}
         width={Dimensions.get('window').width - 32} // Width of chart
