@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../store/store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -47,6 +47,7 @@ const Wallet = () => {
   });
 
   const {balance, coinPrice} = useSelector((state: RootState) => state.miner);
+  const amountInputRef = useRef<TextInput>(null);
 
   const dispatch = useDispatch();
 
@@ -80,6 +81,7 @@ const Wallet = () => {
               transaction: response.data.transactions,
             }));
             dispatch(setBalance(balance - state.amount));
+            amountInputRef.current?.blur();
           } catch (error) {
             console.error('Error fetching data:', error);
           } finally {
@@ -350,6 +352,7 @@ const Wallet = () => {
                 }}>
                 <TextInput
                   inputMode="numeric"
+                  ref={amountInputRef}
                   style={styles.input}
                   placeholder="Amount"
                   value={state.amount ? state.amount.toString() : ''}

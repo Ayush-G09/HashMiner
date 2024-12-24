@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {emailRegex} from '../utils';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../App';
@@ -292,6 +292,23 @@ const Auth = ({navigation}: Props) => {
     }
   };
 
+  useEffect(() => {
+      let interval: NodeJS.Timeout | undefined;
+  
+      if (state.isTimerRunning && state.timer > 0) {
+        // Start the countdown
+        interval = setInterval(() => {
+          setState(prev => ({...prev, timer: state.timer - 1}));
+        }, 1000);
+      } else if (state.timer === 0) {
+        // When timer ends, stop the countdown
+        setState(prev => ({...prev, isTimerRunning: false}));
+        clearInterval(interval);
+      }
+  
+      return () => clearInterval(interval); // Cleanup interval
+    }, [state.isTimerRunning, state.timer]);
+
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -299,9 +316,14 @@ const Auth = ({navigation}: Props) => {
         style={styles.backgroundImage}>
         <Modal isVisible={state.forgotPassword}>
           <View style={styles.modalContainer}>
-            <Text style={{color: 'white', fontSize: 20, fontWeight: 600}}>
-              Reset Password
-            </Text>
+            <View style={{width: '100%', display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+              <Text style={{width: '95%', color: 'white', fontSize: 20, fontWeight: 600, textAlign: 'center'}}>
+                Reset Password
+              </Text>
+              <TouchableOpacity activeOpacity={0.7} style={{paddingHorizontal: 5}} onPress={() => setState((prev) => ({...prev, forgotPassword: false}))}>
+                <Text style={{color: 'red', fontSize: 20, fontWeight: 800}}>X</Text>
+              </TouchableOpacity>
+            </View>
             <TextInput
               inputMode="email"
               style={{...styles.input, marginTop: 50}}
