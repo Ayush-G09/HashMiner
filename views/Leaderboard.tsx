@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import axios from 'axios';
+import axiosInstance from '../axios/axiosConfig';
 
 type State = {
   loading: boolean;
@@ -29,8 +29,8 @@ const Leaderboard = () => {
   const fetchData = async () => {
     try {
       setState(prev => ({...prev, loading: true}));
-      const response = await axios.get(
-        `https://hash-miner-backend.vercel.app/api/auth/leaderboard`,
+      const response = await axiosInstance.get(
+        `/auth/leaderboard`,
       );
       setState(prev => ({...prev, data: response.data.data}));
     } catch (error) {

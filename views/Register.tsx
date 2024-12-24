@@ -12,8 +12,8 @@ import React, {useEffect, useRef, useState} from 'react';
 import {emailRegex} from '../utils';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../App';
-import axios from 'axios';
 import Toast from 'react-native-toast-message';
+import axiosInstance from '../axios/axiosConfig';
 
 type State = {
   email: {
@@ -159,8 +159,8 @@ const Register = ({navigation}: Props) => {
         ...prev,
         validOtp: {...prev.validOtp, loading: true},
       }));
-      const response = await axios.post(
-        'https://hash-miner-backend.vercel.app/api/auth/send-otp',
+      const response = await axiosInstance.post(
+        '/auth/send-otp',
         {email: state.email.value},
       );
 
@@ -256,8 +256,8 @@ const Register = ({navigation}: Props) => {
 
     try {
       setState(prev => ({...prev, signupLoading: true}));
-      await axios.post(
-        'https://hash-miner-backend.vercel.app/api/auth/register',
+      await axiosInstance.post(
+        '/auth/register',
         data,
       );
       Toast.show({

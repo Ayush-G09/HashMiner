@@ -12,10 +12,10 @@ import React, {useRef, useState} from 'react';
 import {emailRegex} from '../utils';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../App';
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import Modal from 'react-native-modal';
+import axiosInstance from '../axios/axiosConfig';
 
 type State = {
   email: {
@@ -105,8 +105,8 @@ const Auth = ({navigation}: Props) => {
 
     try {
       setState(prev => ({...prev, loading: true}));
-      const response = await axios.post(
-        'https://hash-miner-backend.vercel.app/api/auth/login',
+      const response = await axiosInstance.post(
+        '/auth/login',
         data,
       );
       await AsyncStorage.setItem('userToken', response.data.token);
@@ -166,8 +166,8 @@ const Auth = ({navigation}: Props) => {
         ...prev,
         validOtp: {...prev.validOtp, loading: true},
       }));
-      const response = await axios.post(
-        'https://hash-miner-backend.vercel.app/api/auth/reset-password-send-otp',
+      const response = await axiosInstance.post(
+        '/auth/reset-password-send-otp',
         {email: state.resetPassEmail.value},
       );
 
@@ -260,7 +260,7 @@ const Auth = ({navigation}: Props) => {
     if (state.resetCnfPass.value !== state.resetPass.value) {
       setState(prev => ({
         ...prev,
-        resetCnfPass: {...prev.resetCnfPass, error: 'Password are not same'},
+        resetCnfPass: {...prev.resetCnfPass, error: 'Password do not match'},
       }));
       return;
     } else {
@@ -276,8 +276,8 @@ const Auth = ({navigation}: Props) => {
         email: state.resetPassEmail.value,
         newPassword: state.resetPass.value,
       };
-      await axios.post(
-        'https://hash-miner-backend.vercel.app/api/auth/reset-password',
+      await axiosInstance.post(
+        '/auth/reset-password',
         data,
       );
       Toast.show({

@@ -9,8 +9,8 @@ import {
 } from 'react-native';
 import {CodeType, getImageByCode, getNameByCode} from '../utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
 import Toast from 'react-native-toast-message';
+import axiosInstance from '../axios/axiosConfig';
 
 export type MinerCardType = {
   _id: string;
@@ -34,8 +34,8 @@ const MinerCard = ({miner, updateBalance, updateMiner}: Porp) => {
     const UserId = await AsyncStorage.getItem('id');
     try {
       setLoading(true);
-      const response = await axios.post(
-        `https://hash-miner-backend.vercel.app/api/auth//collect-coins/${UserId}/${miner._id}`,
+      const response = await axiosInstance.post(
+        `/auth/collect-coins/${UserId}/${miner._id}`,
       );
       updateBalance(response.data.balance);
       updateMiner(miner._id);

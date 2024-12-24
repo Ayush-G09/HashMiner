@@ -12,10 +12,10 @@ import {
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../store/store';
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import {setBalance} from '../store/minerSlice';
+import axiosInstance from '../axios/axiosConfig';
 
 type State = {
   loading: boolean;
@@ -70,8 +70,8 @@ const Wallet = () => {
               type: 'Coin',
               amount: state.amount,
             };
-            const response = await axios.post(
-              `https://hash-miner-backend.vercel.app/api/auth/transaction`,
+            const response = await axiosInstance.post(
+              `/auth/transaction`,
               data,
             );
             setState(prev => ({
@@ -101,8 +101,8 @@ const Wallet = () => {
     try {
       setState(prev => ({...prev, transactionLoading: true}));
       const userId = await AsyncStorage.getItem('id');
-      const response = await axios.get(
-        `https://hash-miner-backend.vercel.app/api/auth/transactions/${userId}`,
+      const response = await axiosInstance.get(
+        `/auth/transactions/${userId}`,
       );
       setState(prev => ({
         ...prev,
@@ -126,8 +126,8 @@ const Wallet = () => {
         setState(prev => ({...prev, upiLoading: true}));
         const userId = await AsyncStorage.getItem('id');
         const data = {userId: userId, upiID: state.upiId};
-        await axios.put(
-          'https://hash-miner-backend.vercel.app/api/auth/user/upi',
+        await axiosInstance.put(
+          '/auth/user/upi',
           data,
         );
         setState(prev => ({...prev, editing: false}));

@@ -16,8 +16,8 @@ import {RootStackParamList} from '../App';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {launchImageLibrary} from 'react-native-image-picker';
 import Toast from 'react-native-toast-message';
-import axios from 'axios';
 import Modal from 'react-native-modal';
+import axiosInstance from '../axios/axiosConfig';
 
 type State = {
   openLeft: boolean;
@@ -106,8 +106,8 @@ const Header = () => {
         try {
           setState(prev => ({...prev, updatingImage: true}));
           const userId = await AsyncStorage.getItem('id');
-          await axios.post(
-            `https://hash-miner-backend.vercel.app/api/auth/user/${userId}/image`,
+          await axiosInstance.post(
+            `/auth/user/${userId}/image`,
             {image: dataUri},
           );
           setPhoto(dataUri);

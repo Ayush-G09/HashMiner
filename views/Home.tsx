@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import MinerCard from '../components/MinerCard';
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
 import {
@@ -21,6 +20,7 @@ import {
   setMiners,
 } from '../store/minerSlice';
 import {RootState} from '../store/store';
+import axiosInstance from '../axios/axiosConfig';
 
 type State = {
   loading: boolean;
@@ -65,8 +65,8 @@ const Home = () => {
     try {
       const userId = await AsyncStorage.getItem('id');
       setState(prev => ({...prev, loading: true}));
-      const response = await axios.get(
-        `https://hash-miner-backend.vercel.app/api/auth/user/${userId}`,
+      const response = await axiosInstance.get(
+        `/auth/user/${userId}`,
       );
       dispatch(setMiners(response.data.user.miners));
       dispatch(setBalance(response.data.user.balance));
@@ -79,8 +79,8 @@ const Home = () => {
 
   const fetchCoinPrice = async () => {
     try {
-      const response = await axios.get(
-        `https://hash-miner-backend.vercel.app/api/auth/get-coin-price`,
+      const response = await axiosInstance.get(
+        `/auth/get-coin-price`,
       );
       dispatch(setCoinPrice(response.data));
     } catch (error) {
