@@ -314,13 +314,16 @@ const Wallet = ({navigation}: Props) => {
                 </Text>
               </View>
             </View>
+            <Text style={{color: 'white', fontWeight: 800, fontSize: 20, marginTop: 20}}>
+              Your UPI ID
+            </Text>
             <View
               style={{
                 width: '100%',
                 display: 'flex',
                 flexDirection: 'row',
                 height: 50,
-                marginTop: 20,
+                marginTop: 5,
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}>
@@ -334,7 +337,6 @@ const Wallet = ({navigation}: Props) => {
               />
               {state.editing ? (
                 <View style={{display: 'flex', flexDirection: 'row', gap: 10}}>
-                  {' '}
                   <TouchableOpacity
                     activeOpacity={0.7}
                     style={styles.loginButton}
@@ -385,7 +387,7 @@ const Wallet = ({navigation}: Props) => {
                   display: 'flex',
                   flexDirection: 'row',
                   height: 50,
-                  marginTop: 20,
+                  marginTop: 5,
                   justifyContent: 'space-between',
                   alignItems: 'center',
                 }}>
