@@ -22,8 +22,8 @@ import {
 import {RootState} from '../store/store';
 import axiosInstance from '../axios/axiosConfig';
 import Toast from 'react-native-toast-message';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../App';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../App';
 
 type State = {
   loading: boolean;
@@ -71,18 +71,20 @@ const Home = ({navigation}: Props) => {
       const userId = await AsyncStorage.getItem('id');
       const token = await AsyncStorage.getItem('userToken');
       setState(prev => ({...prev, loading: true}));
-      const response = await axiosInstance.get(`/auth/user/${userId}`, {headers: {Authorization: `Bearer ${token}`}});
+      const response = await axiosInstance.get(`/auth/user/${userId}`, {
+        headers: {Authorization: `Bearer ${token}`},
+      });
       dispatch(setMiners(response.data.user.miners));
       dispatch(setBalance(response.data.user.balance));
     } catch (err: any) {
-      if(err.response.data.message === 'Invalid token.'){
+      if (err.response.data.message === 'Invalid token.') {
         await AsyncStorage.removeItem('userToken');
         await AsyncStorage.removeItem('username');
         await AsyncStorage.removeItem('email');
         await AsyncStorage.removeItem('id');
         await AsyncStorage.removeItem('image');
         navigation.navigate('Auth');
-      }else{
+      } else {
         Toast.show({
           type: 'error',
           text1: err.response.data.message,
@@ -95,23 +97,13 @@ const Home = ({navigation}: Props) => {
 
   const fetchCoinPrice = async () => {
     try {
-      const token = await AsyncStorage.getItem('userToken');
-      const response = await axiosInstance.get(`/auth/get-coin-price`, {headers: {Authorization: `Bearer ${token}`}});
-      dispatch(setCoinPrice(response.data));
+      const response = await axiosInstance.get(`/auth/get-prices?period=today`);
+      dispatch(setCoinPrice(response.data.prices[0].price));
     } catch (err: any) {
-      if(err.response.data.message === 'Invalid token.'){
-        await AsyncStorage.removeItem('userToken');
-        await AsyncStorage.removeItem('username');
-        await AsyncStorage.removeItem('email');
-        await AsyncStorage.removeItem('id');
-        await AsyncStorage.removeItem('image');
-        navigation.navigate('Auth');
-      }else{
-        Toast.show({
-          type: 'error',
-          text1: err.response.data.message,
-        });
-      }
+      Toast.show({
+        type: 'error',
+        text1: err.response.data.message,
+      });
     }
   };
 
@@ -213,11 +205,7 @@ const Home = ({navigation}: Props) => {
                   </Text>
                   <Text style={{color: 'white', fontWeight: 500, fontSize: 15}}>
                     1/$
-                    {
-                      coinPrice.datasets[0].data[
-                        coinPrice.datasets[0].data.length - 1
-                      ]
-                    }
+                    {coinPrice}
                   </Text>
                 </View>
               </View>
@@ -277,10 +265,7 @@ const Home = ({navigation}: Props) => {
                     </Text>
                     <Text
                       style={{color: 'white', fontWeight: 500, fontSize: 15}}>
-                      {miners.reduce(
-                        (total, miner) => total + miner.hashRate,
-                        0,
-                      )}{' '}
+                      {miners.reduce((acc, miner) => acc + miner.minerId.hashRate, 0)}{' '}
                       coins/hr ⚡
                     </Text>
                   </View>

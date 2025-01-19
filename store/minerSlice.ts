@@ -4,20 +4,13 @@ import {MinerCardType} from '../components/MinerCard';
 type MinerDataType = {
   balance: number;
   miners: MinerCardType[];
-  coinPrice: {labels: string[]; datasets: {data: number[]}[]};
+  coinPrice: number;
 };
 
 const initialState: MinerDataType = {
   balance: 0,
   miners: [],
-  coinPrice: {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fir', 'Sat', 'Sun'],
-    datasets: [
-      {
-        data: [20, 45, 28, 80, 99, 43, 50],
-      },
-    ],
-  },
+  coinPrice: 0,
 };
 
 const minerSlice = createSlice({
@@ -30,10 +23,7 @@ const minerSlice = createSlice({
     setMiners: (state, action: PayloadAction<MinerCardType[]>) => {
       state.miners = action.payload; // Replace all miners at once
     },
-    setCoinPrice: (
-      state,
-      action: PayloadAction<{labels: string[]; datasets: {data: number[]}[]}>,
-    ) => {
+    setCoinPrice: (state, action: PayloadAction<number>) => {
       state.coinPrice = action.payload;
     },
     resetCoinsMinedById: (state, action: PayloadAction<string>) => {

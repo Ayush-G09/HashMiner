@@ -25,6 +25,8 @@ type State = {
   email: string;
   username: string;
   termsVisible: boolean;
+  referId: string;
+  referredBy: string;
 };
 
 const Header = () => {
@@ -36,6 +38,8 @@ const Header = () => {
     email: '',
     username: '',
     termsVisible: false,
+    referId: '',
+    referredBy: '',
   });
 
   const animatedLeft = useRef(new Animated.Value(100)).current;
@@ -72,12 +76,11 @@ const Header = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const username = await AsyncStorage.getItem('username');
-      const email = await AsyncStorage.getItem('email');
-      if (username && email) {
-        setState(prev => ({...prev, email: email}));
-        setState(prev => ({...prev, username: username}));
-      }
+      const username = await AsyncStorage.getItem('username') || '';
+      const email = await AsyncStorage.getItem('email') || '';
+      const referId = await AsyncStorage.getItem('referId') || '';
+      const referredBy = await AsyncStorage.getItem('referredBy') || '';
+      setState(prev => ({...prev, email: email, username: username, referId: referId, referredBy: referredBy}));
     };
 
     fetchData();
@@ -402,13 +405,20 @@ const Header = () => {
                 value={state.username}
                 editable={false}
               />
-              <Text style={{...styles.label, marginTop: 100}}>Refered By</Text>
+              <Text style={{...styles.label, marginTop: 20}}>Referral Code</Text>
+              <TextInput
+                inputMode="text"
+                style={styles.input}
+                value={state.referId}
+                editable={false}
+              />
+              {state.referredBy && <><Text style={{...styles.label, marginTop: 20}}>Refered By</Text>
               <TextInput
                 inputMode="email"
                 style={styles.input}
-                value="ayushgokhle@gmail.com"
+                value={state.referredBy}
                 editable={false}
-              />
+              /></>}
 
               <TouchableOpacity
                 onPress={() =>
@@ -489,7 +499,7 @@ const styles = StyleSheet.create({
     color: 'white',
     width: '78%',
     fontWeight: '400',
-    fontSize: 20,
+    fontSize: 18,
   },
   loginButton: {
     height: 40,

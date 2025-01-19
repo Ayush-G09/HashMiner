@@ -106,11 +106,14 @@ const Auth = ({navigation}: Props) => {
     try {
       setState(prev => ({...prev, loading: true}));
       const response = await axiosInstance.post('/auth/login', data);
+      console.log({e: response.data})
       await AsyncStorage.setItem('userToken', response.data.token);
       await AsyncStorage.setItem('username', response.data.user.username);
       await AsyncStorage.setItem('email', response.data.user.email);
       await AsyncStorage.setItem('id', response.data.user.id);
       await AsyncStorage.setItem('image', response.data.user.image);
+      await AsyncStorage.setItem('referId', response.data.user.referId);
+      await AsyncStorage.setItem('referredBy', response.data.user.referredBy);
       setState(prev => ({
         ...prev,
         email: {...prev.email, value: ''},

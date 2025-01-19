@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ImageBackground,
   FlatList,
@@ -7,84 +7,22 @@ import {
   View,
   Image,
   TouchableOpacity,
+  RefreshControl,
 } from 'react-native';
-import RazorpayCheckout, {CheckoutOptions} from 'react-native-razorpay';
 import Modal from 'react-native-modal';
+import axiosInstance from '../axios/axiosConfig';
+import Toast from 'react-native-toast-message';
+import RazorpayCheckout from 'react-native-razorpay';
 
 type CardData = {
-  id: string;
+  _id: string;
   name: string;
-  price: string;
-  description: string;
-  hashRate: string;
-  image: any;
+  capacity: number;
+  desc: string;
+  hashRate: number;
+  image: string;
+  price: number;
 };
-
-const cardData: CardData[] = [
-  {
-    id: '1',
-    name: 'Basic Miner',
-    price: '$100',
-    description:
-      'A reliable entry-level miner for beginners, offering consistent performance.',
-    hashRate: '1 Coin/hr',
-    image: require('../assets/m1.png'),
-  },
-  {
-    id: '2',
-    name: 'Advanced Miner',
-    price: '$120',
-    description:
-      'A cost-effective miner with boosted performance for moderate crypto earnings.',
-    hashRate: '10 Coin/hr',
-    image: require('../assets/m2.png'),
-  },
-  {
-    id: '3',
-    name: 'Pro Miner',
-    price: '$150',
-    description:
-      'A high-performance miner for users looking to scale their operations.',
-    hashRate: '1200 H/s',
-    image: require('../assets/m3.png'),
-  },
-  {
-    id: '4',
-    name: 'Galaxy Miner',
-    price: '$200',
-    description:
-      'A cutting-edge device with futuristic tech, designed for premium mining yields.',
-    hashRate: '1500 H/s',
-    image: require('../assets/m4.png'),
-  },
-  {
-    id: '5',
-    name: 'Quantum Extractor',
-    price: '$200',
-    description:
-      'A revolutionary miner utilizing quantum tech for unmatched hashing power.',
-    hashRate: '1500 H/s',
-    image: require('../assets/m5.png'),
-  },
-  {
-    id: '6',
-    name: 'Cosmic Harvester',
-    price: '$200',
-    description:
-      'A sci-fi marvel that pushes the boundaries of mining efficiency.',
-    hashRate: '1500 H/s',
-    image: require('../assets/m6.png'),
-  },
-  {
-    id: '7',
-    name: 'Nebula Reactor',
-    price: '$200',
-    description:
-      'An elite miner equipped with intergalactic tech, a must-have for top miners.',
-    hashRate: '1500 H/s',
-    image: require('../assets/m7.png'),
-  }
-];
 
 const Tag = ({ label, backgroundColor }: { label: string; backgroundColor: string }) => (
   <View style={[styles.tag, { backgroundColor }]}>
@@ -95,13 +33,13 @@ const Tag = ({ label, backgroundColor }: { label: string; backgroundColor: strin
 const Card = ({ item, onSelect }: { item: CardData, onSelect: (name: string) => void} ) => (
   <View style={styles.cardContainer}>
     <View style={styles.imageContainer}>
-      <Image source={item.image} style={styles.foregroundImage} />
+      <Image src={item.image} style={styles.foregroundImage} />
     </View>
     <View style={styles.cardContent}>
       <View style={styles.cardDetails}>
         <Text style={styles.cardTitle}>{item.name}</Text>
-        <Text style={styles.cardDescription}>{item.description}</Text>
-        <TouchableOpacity onPress={() => onSelect(item.id)} activeOpacity={0.7} style={styles.loginButton}>
+        <Text style={styles.cardDescription}>{item.desc}</Text>
+        <TouchableOpacity onPress={() => onSelect(item._id)} activeOpacity={0.7} style={styles.loginButton}>
           <View style={styles.loginButtonContainer}>
             <Text style={styles.loginButtonText}>View</Text>
           </View>
@@ -114,30 +52,8 @@ const Card = ({ item, onSelect }: { item: CardData, onSelect: (name: string) => 
 const Subscription = () => {
   const [modal, setModal] = useState<boolean>(false);
   const [selected, setSelected] = useState<string>('');
-  const handlePayment = () => {
-    var options = {
-      description: 'Credits towards consultation',
-      image: 'https://i.imgur.com/3g7nmJC.png',
-      currency: 'INR',
-      key: '', 
-      order_id: '',
-      amount: 5000,
-      name: 'foo',
-      prefill: {
-        email: 'void@razorpay.com',
-        contact: '9191919191',
-        name: 'Razorpay Software'
-      },
-      theme: {color: '#F37254'}
-    }
-    RazorpayCheckout.open(options).then((data) => {
-      // handle success
-      console.log(`Success: ${data.razorpay_payment_id}`);
-    }).catch((error) => {
-      // handle failure
-      console.log(`Error: ${error.code} | ${error.description}`);
-    });
-  };
+  const [miners, setMiners] = useState<CardData[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const onSelect = (id: string) => {
     setSelected(id);
@@ -147,22 +63,68 @@ const Subscription = () => {
   const closeModal = () => {
     setModal(false);
   };
+
+  const handlePayment = () => {
+    return;
+    // var options = {
+    //   description: 'buying a miner',
+    //   image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/800px-Bitcoin.svg.png',
+    //   currency: 'INR',
+    //   key: '',
+    //   amount: 100*100,
+    //   name: 'test order',
+    //   order_id: "",
+    //   prefill: {
+    //     email: 'xyz@gmail.com',
+    //     contact: '9999999999',
+    //     name: 'User 1',
+    //   },
+    //   theme: {color: "#F37254"},
+    // };
+
+    // RazorpayCheckout.open(options).then((data) => {
+    //   console.log(data)
+    // }).catch((err) => {
+    //   console.log(err)
+    // });
+  };
+
+  const fetchMiners = async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.get('/auth/all-miners');
+      setMiners(response.data.miners);
+    } catch (err: any) {
+      console.error('Error fetching miners:', err);
+      Toast.show({
+        type: 'error',
+        text1: err.response?.data.message || 'Unknown error occurred',
+      });
+    }finally{
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMiners();
+  }, []);
+
   return ( 
   <View style={styles.container}>
     <Modal isVisible={modal} style={{display: 'flex', alignItems: 'center'}}>
       <View style={{width: '100%', backgroundColor: 'black', borderRadius: 20, overflow: 'hidden'}}>
         <View style={styles.imageContainer}>
-          <Image source={cardData.find(card => card.id === selected)?.image} style={styles.foregroundImage} />
+          <Image src={miners.find(card => card._id === selected)?.image} style={styles.foregroundImage} />
         </View>
         <View style={styles.cardContent}>
       <View style={{...styles.cardDetails, backgroundColor: 'white'}}>
-        <Text style={{...styles.cardTitle, color: 'black'}}>{cardData.find(card => card.id === selected)?.name}</Text>
-        <Text style={{...styles.cardDescription, color: 'black'}}>{cardData.find(card => card.id === selected)?.description}</Text>
+        <Text style={{...styles.cardTitle, color: 'black'}}>{miners.find(card => card._id === selected)?.name}</Text>
+        <Text style={{...styles.cardDescription, color: 'black'}}>{miners.find(card => card._id === selected)?.desc}</Text>
         <View style={{width: '55%', display: 'flex', marginRight: 'auto', marginTop: 15}}>
-          <Tag label={`Hash Rate: ${cardData.find(card => card.id === selected)?.hashRate!}`} backgroundColor='crimson'/>
+          <Tag label={`Hash Rate: ${miners.find(card => card._id === selected)?.hashRate!} coin/hr`} backgroundColor='crimson'/>
         </View>
         <View style={{width: '35%', display: 'flex', marginRight: 'auto', marginTop: 0}}>
-          <Tag label={`Price: ${cardData.find(card => card.id === selected)?.price!}`} backgroundColor='limegreen'/>
+          <Tag label={`Price: ${miners.find(card => card._id === selected)?.price!}`} backgroundColor='limegreen'/>
         </View>
         <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', marginTop: 20}}>
         <TouchableOpacity onPress={handlePayment} activeOpacity={0.7} style={{...styles.loginButton, marginTop: 0, width: '40%'}}>
@@ -183,11 +145,17 @@ const Subscription = () => {
     <ImageBackground source={require('../assets/gra4.jpg')} style={styles.backgroundImage}>
       <Text style={styles.headerText}>Subscriptions</Text>
       <FlatList
-        data={cardData}
+        data={miners}
         renderItem={({ item }) => <Card item={item} onSelect={onSelect} />}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={fetchMiners}
+          />
+        }
       />
     </ImageBackground>
   </View>
@@ -211,14 +179,17 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '800',
     marginVertical: 20,
-    paddingLeft: '5%'
+    paddingLeft: '5%',
+    textAlign: 'left',
+    width: '100%',
   },
   listContent: {
-    width: '90%',
-    paddingVertical: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexGrow: 1,
   },
   cardContainer: {
-    width: '100%',
+    width: '95%',
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
     borderRadius: 10,
     marginTop: 20,
@@ -239,8 +210,6 @@ const styles = StyleSheet.create({
   foregroundImage: {
     width: 250,
     height: 250,
-    position: 'absolute',
-    top: 50,
   },
   cardContent: {
     width: '100%',

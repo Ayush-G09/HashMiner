@@ -2,6 +2,7 @@ import {
   ActivityIndicator,
   Image,
   ImageBackground,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -29,7 +30,7 @@ type State = {
     type: 'Miner' | 'Coin';
     title: string;
     date: string;
-    status: 'Pending' | 'Complete';
+    status: 'Pending' | 'Completed' | 'Failed';
     amount: number;
     _id: string;
     to: string;
@@ -187,6 +188,12 @@ const Wallet = ({navigation}: Props) => {
       <ImageBackground
         source={require('../assets/gra4.jpg')}
         style={styles.backgroundImage}>
+          <ScrollView style={{width: '100%', height: '100%'}} refreshControl={
+                        <RefreshControl
+                          refreshing={state.transactionLoading}
+                          onRefresh={fetchTransactions}
+                        />
+                      }>
         <View style={{width: '100%', height: '100%', alignItems: 'center'}}>
           <View style={{width: '90%', height: '100%'}}>
             <Text
@@ -230,8 +237,8 @@ const Wallet = ({navigation}: Props) => {
                     justifyContent: 'center',
                   }}>
                   <Image
-                    source={require('../assets/wallet.gif')}
-                    style={{width: 40, height: 40}}
+                    source={require('../assets/wallet-1.png')}
+                    style={{width: 30, height: 30}}
                   />
                 </View>
                 <Text style={{fontSize: 13, fontWeight: '400', color: 'gray'}}>
@@ -261,8 +268,8 @@ const Wallet = ({navigation}: Props) => {
                     justifyContent: 'center',
                   }}>
                   <Image
-                    source={require('../assets/dollar.gif')}
-                    style={{width: 40, height: 40}}
+                    source={require('../assets/coin.png')}
+                    style={{width: 30, height: 30}}
                   />
                 </View>
                 <Text style={{fontSize: 13, fontWeight: '400', color: 'gray'}}>
@@ -270,9 +277,7 @@ const Wallet = ({navigation}: Props) => {
                 </Text>
                 <Text style={{fontSize: 15, fontWeight: '600'}}>
                   {
-                    coinPrice.datasets[0].data[
-                      coinPrice.datasets[0].data.length - 1
-                    ]
+                    coinPrice     
                   }
                   $/1 coin
                 </Text>
@@ -299,8 +304,8 @@ const Wallet = ({navigation}: Props) => {
                     justifyContent: 'center',
                   }}>
                   <Image
-                    source={require('../assets/transaction.gif')}
-                    style={{width: 40, height: 40}}
+                    source={require('../assets/cash-flow.png')}
+                    style={{width: 30, height: 30}}
                   />
                 </View>
                 <Text style={{fontSize: 13, fontWeight: '400', color: 'gray'}}>
@@ -421,7 +426,6 @@ const Wallet = ({navigation}: Props) => {
                 width: '100%',
                 backgroundColor: 'white',
                 alignItems: 'center',
-                height: '45%',
                 marginTop: 30,
                 borderTopRightRadius: 30,
                 borderTopLeftRadius: 30,
@@ -435,7 +439,6 @@ const Wallet = ({navigation}: Props) => {
                 }}>
                 Transaction History
               </Text>
-              <ScrollView style={{width: '100%'}}>
                 <View
                   style={{
                     width: '100%',
@@ -470,17 +473,19 @@ const Wallet = ({navigation}: Props) => {
                             height: 40,
                             borderRadius: '50%',
                             backgroundColor:
-                              data.status === 'Complete'
+                              data.status === 'Completed'
                                 ? 'rgba(144, 238, 144, 0.5)'
-                                : 'rgba(173, 216, 230, 0.5)',
+                                : data.status === 'Pending' ? 'rgba(173, 216, 230, 0.5)' 
+                                : '#FFE5E5',
                             alignItems: 'center',
                             justifyContent: 'center',
                           }}>
                           <Image
                             source={
-                              data.status === 'Complete'
+                              data.status === 'Completed'
                                 ? require('../assets/checked.png')
-                                : require('../assets/time.png')
+                                : data.status === 'Pending' ? require('../assets/time.png')
+                                : require('../assets/cancel.png')
                             }
                             style={{width: 20, height: 20}}
                           />
@@ -538,10 +543,10 @@ const Wallet = ({navigation}: Props) => {
                     </View>
                   )}
                 </View>
-              </ScrollView>
             </View>
           </View>
         </View>
+        </ScrollView>
       </ImageBackground>
     </View>
   );

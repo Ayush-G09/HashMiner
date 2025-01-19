@@ -11,7 +11,6 @@ import MyLineChart from '../components/LineChart';
 import {useSelector} from 'react-redux';
 import {RootState} from '../store/store';
 import {MinerCardType} from '../components/MinerCard';
-import {getImageByCode, getNameByCode} from '../utils';
 
 type Props = {
   miner: MinerCardType;
@@ -29,15 +28,15 @@ const MinerCard = ({miner, index}: Props) => {
       <View style={styles.cardContent}>
         <View style={styles.imageContainer}>
           <Image
-            source={getImageByCode(miner.type)}
+            src={miner.minerId.image}
             style={styles.minerImage}
           />
         </View>
         <View style={styles.detailsContainer}>
-          <Text style={styles.minerType}>{getNameByCode(miner.type)}</Text>
+          <Text style={styles.minerType}>{miner.minerId.name}</Text>
           <View style={styles.row}>
             <Text style={styles.label}>Mining Rate</Text>
-            <Text style={styles.value}>{miner.hashRate} coin/hr</Text>
+            <Text style={styles.value}>{miner.minerId.hashRate} coin/hr</Text>
           </View>
           <View style={styles.row}>
             <Text style={styles.label}>Coins Mined</Text>

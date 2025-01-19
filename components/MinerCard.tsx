@@ -7,7 +7,6 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import {CodeType, getImageByCode, getNameByCode} from '../utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import axiosInstance from '../axios/axiosConfig';
@@ -16,12 +15,18 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../App';
 
 export type MinerCardType = {
+  minerId: {
+    _id: string,
+    hashRate: number,
+    capacity: number,
+    image: string,
+    name: string,
+    desc: string,
+    price: number,
+  },
   _id: string;
   status: 'Running' | 'Stopped';
-  type: CodeType;
-  hashRate: number;
   coinsMined: number;
-  capacity: number;
 };
 
 type Porp = {
@@ -43,6 +48,7 @@ const MinerCard = ({miner, updateBalance, updateMiner}: Porp) => {
       const response = await axiosInstance.post(
         `/auth/collect-coins/${UserId}/${miner._id}`, {}, {headers: {Authorization: `Bearer ${token}`}}
       );
+      console.log({response: response.data})
       updateBalance(response.data.balance);
       updateMiner(miner._id);
       Toast.show({
@@ -72,7 +78,7 @@ const MinerCard = ({miner, updateBalance, updateMiner}: Porp) => {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.minerName}>{getNameByCode(miner.type)}</Text>
+        <Text style={styles.minerName}>{miner.minerId.name}</Text>
         <View
           style={{
             display: 'flex',
@@ -109,12 +115,12 @@ const MinerCard = ({miner, updateBalance, updateMiner}: Porp) => {
       </View>
 
       <View style={styles.imageContainer}>
-        <Image source={getImageByCode(miner.type)} style={styles.minerImage} />
+        <Image src={miner.minerId.image} style={styles.minerImage} />
       </View>
 
-      <InfoRow title="Hash Rate" value={miner.hashRate} />
+      <InfoRow title="Hash Rate" value={miner.minerId.hashRate} />
       <InfoRow title="Coins Mined" value={miner.coinsMined} />
-      <InfoRow title="Capacity" value={miner.capacity} />
+      <InfoRow title="Capacity" value={miner.minerId.capacity} />
 
       {!(miner.coinsMined === 0) && (
         <TouchableOpacity

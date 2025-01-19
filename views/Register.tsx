@@ -43,6 +43,10 @@ type State = {
     value: string;
     loading: boolean;
   };
+  refferId: {
+    value: string;
+    error: string;
+  };
   signupLoading: boolean;
   otp: string[];
   timer: number;
@@ -84,6 +88,10 @@ const Register = ({navigation}: Props) => {
     otp: Array(6).fill(''),
     timer: 120,
     isTimerRunning: true,
+    refferId: {
+      value: '',
+      error: '',
+    },
   });
 
   // Explicitly typing the ref as an array of TextInput or null
@@ -164,6 +172,7 @@ const Register = ({navigation}: Props) => {
       });
 
       const data = response.data;
+      console.log({data});
       // Update the state on successful OTP send
       setState(prev => ({...prev, timer: 120}));
       setState(prev => ({
@@ -245,10 +254,12 @@ const Register = ({navigation}: Props) => {
         cnfPassword: {...prev.cnfPassword, error: ''},
       }));
     }
+
     const data = {
       username: state.username.value,
       email: state.email.value,
       password: state.password.value,
+      referredBy: state.refferId.value,
     };
 
     try {
@@ -261,6 +272,11 @@ const Register = ({navigation}: Props) => {
       });
       navigation.navigate('Auth');
     } catch (error: any) {
+      console.log({e: error.response.data})
+      if(error.response.data.message === 'Invalid referral code'){
+        setState((prev) => ({...prev, refferId: {...prev.refferId, error: 'Invalid referral code'}}));
+        return;
+      };
       Toast.show({
         type: 'error',
         text1: error.response.data.message,
@@ -480,6 +496,24 @@ const Register = ({navigation}: Props) => {
               {state.cnfPassword.error && (
                 <Text style={{color: 'red', width: '80%', marginTop: 2}}>
                   {state.cnfPassword.error}
+                </Text>
+              )}
+
+              <TextInput
+                inputMode="text"
+                style={{...styles.input, marginTop: 20}}
+                placeholder="Referral Id"
+                value={state.refferId.value}
+                onChangeText={e =>
+                  setState(prev => ({
+                    ...prev,
+                    refferId: {...prev.refferId, value: e},
+                  }))
+                }
+              />
+              {state.refferId.error && (
+                <Text style={{color: 'red', width: '80%', marginTop: 2}}>
+                  {state.refferId.error}
                 </Text>
               )}
 

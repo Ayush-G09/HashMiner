@@ -2,6 +2,7 @@ import {
   ActivityIndicator,
   Image,
   ImageBackground,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -68,6 +69,12 @@ const Leaderboard = ({navigation}: Props) => {
         source={require('../assets/gra4.jpg')}
         style={styles.backgroundImage}>
         <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={state.loading}
+              onRefresh={fetchData}
+            />
+          }
           showsVerticalScrollIndicator={false}
           style={{width: '100%'}}>
           <View
